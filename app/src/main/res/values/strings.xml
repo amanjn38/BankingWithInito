@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">BankingWithInito</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="name">Name :</string>
+    <string name="address">Address :</string>
+    <string name="phone">Phone :</string>
+    <string name="sign_in">SIGN IN</string>
+    <string name="gallery">Gallery</string>
+    <string name="photo">Photo</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

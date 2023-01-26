@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "905387220066",
+    "firebase_url": "https://bankingwithinito-default-rtdb.firebaseio.com",
+    "project_id": "bankingwithinito",
+    "storage_bucket": "bankingwithinito.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:905387220066:android:3d3e78cb61cb280d87c53b",
+        "android_client_info": {
+          "package_name": "in.finances.bankingwithinito"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "905387220066-vd9pnpol0cnsk822arpf8v0ugnoqh8sp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBst7ua7FX6sE1-aZkHus_BqiH2QO5CiG4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "905387220066-vd9pnpol0cnsk822arpf8v0ugnoqh8sp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
