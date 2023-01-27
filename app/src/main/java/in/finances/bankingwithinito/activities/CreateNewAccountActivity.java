@@ -28,7 +28,7 @@ public class CreateNewAccountActivity extends AppCompatActivity {
         });
 
         current.setOnClickListener(view -> {
-            Intent intent = new Intent(CreateNewAccountActivity.this, CurrentAccountActivity.class);
+            Intent intent = new Intent(CreateNewAccountActivity.this, AccountDetailsActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         });

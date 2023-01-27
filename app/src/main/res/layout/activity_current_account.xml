@@ -4,15 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.CurrentAccountActivity">
+    tools:context=".activities.AccountDetailsActivity">
 
     <TextView
-        android:id="@+id/text"
+        android:id="@+id/account_type"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:gravity="center"
-        android:text="Create a new Current Account"
+        android:text=""
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -28,7 +28,7 @@
         android:textColorHint="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text">
+        app:layout_constraintTop_toBottomOf="@id/account_type">
 
         <EditText
             android:id="@+id/amount"
@@ -39,19 +39,51 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
-        android:id="@+id/createAccount"
+        android:id="@+id/withdraw"
         android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginStart="48dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="48dp"
         android:layout_marginBottom="24dp"
-        android:background="@drawable/ic_button"
+        android:background="@drawable/address"
         android:gravity="center"
-        android:text="Create Account"
-        android:textColor="#ffffff"
+        android:text="Withdraw  "
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@id/withdrawWithATM"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/withdrawWithATM"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="48dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/address"
+        android:gravity="center"
+        android:text="Withdraw with ATM  "
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@id/deposit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/deposit"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="48dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/address"
+        android:gravity="center"
+        android:text="Deposit"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

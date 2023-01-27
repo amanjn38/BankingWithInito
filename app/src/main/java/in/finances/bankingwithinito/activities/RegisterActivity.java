@@ -30,7 +30,6 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -43,6 +42,7 @@ import java.util.List;
 import java.util.Random;
 
 import in.finances.bankingwithinito.R;
+import in.finances.bankingwithinito.models.CustomerDetails;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -70,7 +70,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance();
         FirebaseAuth auth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = auth.getCurrentUser();
         String phoneNumber = "7310919162";
 
         update = getIntent().getBooleanExtra("update", false);
@@ -136,8 +135,7 @@ public class RegisterActivity extends AppCompatActivity {
                 }
             }
         });
-        EditText editText = findViewById(R.id.time_text);
-        editText.setText(phoneNumber);
+
     }
 
 
@@ -155,16 +153,19 @@ public class RegisterActivity extends AppCompatActivity {
         String strphone = ((EditText) findViewById(R.id.time_text)).getText().toString();
         String username = ((EditText) findViewById(R.id.username)).getText().toString();
 
-        infor.put("e", strmail);
-        infor.put("n", strname);
-        infor.put("add", straddr);
-        infor.put("ph", strphone);
-        infor.put("un", username);
-        infor.put("lt", latitude);
-        infor.put("lo", longitude);
-        infor.put("dob", date1);
-        infor.put("uid", FirebaseAuth.getInstance().getCurrentUser().getUid());
-        FirebaseFirestore.getInstance().collection("customers").document(username).set(infor).addOnCompleteListener(task -> {
+//        infor.put("e", strmail);
+//        infor.put("n", strname);
+//        infor.put("add", straddr);
+//        infor.put("ph", strphone);
+//        infor.put("un", username);
+//        infor.put("lt", latitude);
+//        infor.put("lo", longitude);
+//        infor.put("dob", date1);
+//        infor.put("uid", FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+        CustomerDetails customerDetails = new CustomerDetails(strname, straddr, strmail, strphone, username, FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                latitude, longitude, date1);
+        FirebaseFirestore.getInstance().collection("customers").document(username).set(customerDetails).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 progressDialog.dismiss();
                 Toast.makeText(RegisterActivity.this, "Your data has been stored successfully", Toast.LENGTH_LONG).show();

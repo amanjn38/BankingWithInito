@@ -10,7 +10,13 @@ import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.List;
+
 import in.finances.bankingwithinito.R;
+import in.finances.bankingwithinito.adapters.TransactionAdapter;
+import in.finances.bankingwithinito.models.AdminTransaction;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -70,6 +76,18 @@ public class AccountsListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_accounts_list_activity, container, false);
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("customerUID", Context.MODE_PRIVATE);
         String customerUID = sharedPreferences.getString("customerUID", "");
+
+//        FirebaseFirestore.getInstance().collection("customers").document(customerUID).get()
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful()) {
+//                        List<AdminTransaction> snapshotCoupons = task.getResult().toObjects(AdminTransaction.class);
+//                        adminTransactions.addAll(snapshotCoupons);
+//                    }
+////                    Log.d("couponfrag1", coupons.toString());
+//                    TransactionAdapter transactionAdapter = new TransactionAdapter(adminTransactions, getApplicationContext());
+//                    recyclerView.setAdapter(transactionAdapter);
+//                    transactionAdapter.notifyDataSetChanged();
+//                });
 
         return view;
     }

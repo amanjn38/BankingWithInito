@@ -41,7 +41,7 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".activities.CurrentAccountActivity"
+            android:name=".activities.AccountDetailsActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
