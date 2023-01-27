@@ -24,7 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
-        android:hint="Amount :"
+        android:hint="Amount to withdraw :"
         android:textColorHint="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -39,6 +39,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
+        android:visibility="gone"
         android:id="@+id/holderCardNumber"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
@@ -63,8 +64,11 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <LinearLayout
+        android:id="@+id/ll"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:baselineAligned="false"
         android:orientation="horizontal"
         android:weightSum="2"
         app:layout_constraintEnd_toEndOf="parent"
@@ -82,7 +86,7 @@
             android:textColorHint="@color/colorPrimaryDark">
 
             <EditText
-                android:id="@+id/expirtDate"
+                android:id="@+id/expiryDate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="#ffffff"
@@ -120,4 +124,21 @@
                 android:maxLength="3" />
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/completeTransaction"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="48dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/address"
+        android:gravity="center"
+        android:text="Complete Transaction"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ll" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

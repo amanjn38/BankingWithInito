@@ -4,7 +4,9 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +21,9 @@ import in.finances.bankingwithinito.R;
 public class IndividualTransactionActivity extends AppCompatActivity {
 
     private TextView transaction_type;
+    public String balance, error_msg, customerUID, type, accNum, t_type;
+    private LinearLayout ll;
+    private EditText amount, cardNumber, cvv, expiryDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +31,20 @@ public class IndividualTransactionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_individual_transaction);
 
         transaction_type = findViewById(R.id.transaction_type);
+        amount = findViewById(R.id.amount);
+        cardNumber = findViewById(R.id.cardNumber);
+        cvv = findViewById(R.id.cvv);
+        expiryDate = findViewById(R.id.expiryDate);
+        balance = getIntent().getStringExtra("balance");
+        accNum = getIntent().getStringExtra("account_number");
+        type = getIntent().getStringExtra("account_type");
+        t_type = getIntent().getStringExtra("type");
+        ll = findViewById(R.id.ll);
 
+        if(t_type.equalsIgnoreCase("atm_withdraw")){
+            ll.setVisibility(View.VISIBLE);
+
+        }
         EditText cardNumberInput = findViewById(R.id.cardNumber);
         cardNumberInput.addTextChangedListener(new TextWatcher() {
             private static final char space = ' ';
@@ -60,7 +78,7 @@ public class IndividualTransactionActivity extends AppCompatActivity {
 
         String cardNumber = cardNumberInput.getText().toString().replace(" ", "");
 
-        EditText expiryDate = findViewById(R.id.expirtDate);
+        EditText expiryDate = findViewById(R.id.expiryDate);
         expiryDate.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

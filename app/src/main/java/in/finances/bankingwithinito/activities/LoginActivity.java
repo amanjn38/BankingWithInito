@@ -53,6 +53,7 @@ public class LoginActivity extends AppCompatActivity {
         boolean update = getIntent().getBooleanExtra("update", false);
 
         if (auth.getCurrentUser() == null) {
+            System.out.println("Working");
             progressDialog.setTitle("Authenticating...");
             progressDialog.setMessage("Please wait.. This may take a moment..");
             findViewById(R.id.sign_up).setOnClickListener(e -> {
@@ -68,33 +69,29 @@ public class LoginActivity extends AppCompatActivity {
                     progressDialog.show();
 
                     customerUID = cUID.getText().toString();
-                    if (customerUID != null) {
-                        FirebaseFirestore.getInstance().collection("customers").document(customerUID).get().addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                DocumentSnapshot document = task.getResult();
-                                if (document.exists()) {
-                                    System.out.println("testing" + "document exustys");
-                                    // Retrieve data as a HashMap
-                                    HashMap<String, Object> data = (HashMap<String, Object>) document.getData();
-                                    String email = data.get("e").toString();
-                                    login(email);
+                    FirebaseFirestore.getInstance().collection("customers").document(customerUID).get().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                System.out.println("testing" + "document exustys");
+                                // Retrieve data as a HashMap
+                                HashMap<String, Object> data = (HashMap<String, Object>) document.getData();
+                                String email = data.get("e").toString();
+                                login(email);
 //                                    Log.d(TAG, "Data: " + data);
-                                } else {
-//                                    Log.d(TAG, "No such document");
-                                    Toast.makeText(LoginActivity.this, "Please enter correct username", Toast.LENGTH_LONG).show();
-                                }
                             } else {
-//                                Log.d(TAG, "get failed with ", task.getException());
+//                                    Log.d(TAG, "No such document");
+                                Toast.makeText(LoginActivity.this, "Please enter correct username", Toast.LENGTH_LONG).show();
                             }
-                        });
-
-                    }
+                        }
+                    });
 
                 } else {
                     Snackbar.make(findViewById(R.id.email), errMsg, Snackbar.LENGTH_SHORT).show();
                 }
             });
         } else {
+            System.out.println("Working22");
             ROOT_UID = auth.getUid();
             Intent fragment = new Intent(this, MainActivity.class);
             startActivity(fragment);
