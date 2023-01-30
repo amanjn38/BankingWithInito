@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -60,7 +61,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<AccountsAdapter.ViewHo
     static class ViewHolder extends RecyclerView.ViewHolder {
 
         private TextView account_type, account_number, balance;
-        private CardView cardView;
+        private ConstraintLayout cardView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);

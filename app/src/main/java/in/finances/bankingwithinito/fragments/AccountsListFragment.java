@@ -94,17 +94,23 @@ public class AccountsListFragment extends Fragment {
         layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
+        System.out.println("testing accounts");
         FirebaseFirestore.getInstance().collection("customers_usernames").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
                     DocumentSnapshot d = task.getResult();
                     if (d.contains("username")) {
-                        String customerUID = d.getString("username").toString();
-                        FirebaseFirestore.getInstance().collection("customers").document(customerUID).collection("accounts").get()
+                        String customerUID = d.getString("username");
+                        System.out.println("testing accounts2" + customerUID);
+
+                        FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").get()
                                 .addOnCompleteListener(task1 -> {
                                     if (task1.isSuccessful()) {
+                                        System.out.println("testing accounts3");
                                         List<Individual_Account> snapshotCoupons = task1.getResult().toObjects(Individual_Account.class);
+                                        System.out.println("testing accounts5" + snapshotCoupons.toString());
+
                                         individual_accounts.addAll(snapshotCoupons);
                                     }
                                     AccountsAdapter accountsAdapter = new AccountsAdapter(individual_accounts, getContext());

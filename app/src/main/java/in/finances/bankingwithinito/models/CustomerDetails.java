@@ -1,19 +1,18 @@
 package in.finances.bankingwithinito.models;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public class CustomerDetails implements Serializable {
 
     private String n, add, e, ph, un, uid;
     private Double lt, lo;
-    private Date dob;
+    private long dob;
 
     public CustomerDetails() {
 
     }
 
-    public CustomerDetails(String n, String add, String e, String ph, String un, String uid, Double lt, Double lo, Date dob) {
+    public CustomerDetails(String n, String add, String e, String ph, String un, String uid, Double lt, Double lo, long dob) {
         this.n = n;
         this.add = add;
         this.e = e;
@@ -89,11 +88,11 @@ public class CustomerDetails implements Serializable {
         this.lo = lo;
     }
 
-    public Date getDob() {
+    public long getDob() {
         return dob;
     }
 
-    public void setDob(Date dob) {
+    public void setDob(long dob) {
         this.dob = dob;
     }
 }

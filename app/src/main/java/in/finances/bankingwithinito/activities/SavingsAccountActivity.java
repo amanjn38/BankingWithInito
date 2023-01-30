@@ -1,5 +1,7 @@
 package in.finances.bankingwithinito.activities;
 
+import static in.finances.bankingwithinito.Utils.generateAccountNumber;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,6 +18,7 @@ import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 import in.finances.bankingwithinito.R;
 import in.finances.bankingwithinito.models.Individual_Account;
@@ -58,7 +61,7 @@ public class SavingsAccountActivity extends AppCompatActivity {
                     String card_number = generateCardNumber();
                     String expiryDate = generateExpiry();
                     String cvv = generateCVV();
-                    String accNum = generate();
+                    String accNum = String.valueOf(generateAccountNumber());
                     infor.put("cardNumber", card_number);
                     infor.put("expiry", expiryDate);
                     infor.put("cvv", cvv);
@@ -68,7 +71,7 @@ public class SavingsAccountActivity extends AppCompatActivity {
 
                     SharedPreferences sharedPreferences = getSharedPreferences("customerUID", Context.MODE_PRIVATE);
                     String customerUID = sharedPreferences.getString("customerUID", "");
-                    FirebaseFirestore.getInstance().collection("customers").document(customerUID).collection("savings").document(accNum).set(infor).addOnCompleteListener(task -> {
+                    FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("savings").document(accNum).set(infor).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             Toast.makeText(SavingsAccountActivity.this, "Your acccount has been successfully created", Toast.LENGTH_LONG).show();
                         }
@@ -79,7 +82,7 @@ public class SavingsAccountActivity extends AppCompatActivity {
                             Toast.makeText(SavingsAccountActivity.this, "Your acccount has been successfully created", Toast.LENGTH_LONG).show();
                             Intent intent = new Intent(SavingsAccountActivity.this, MainActivity.class);
                             intent.putExtra("customerUID", customerUID);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(intent);
                         }
                     });
@@ -97,13 +100,13 @@ public class SavingsAccountActivity extends AppCompatActivity {
                     infor.put("tt", tt); //total transactions in a month
                     infor.put("lastopened", lastOpened);
                     infor.put("transactions", transactions);
-                    String accNum = generate();
+                    String accNum = String.valueOf(generateAccountNumber());
 
                     infor.put("accnum", accNum);
                     Individual_Account individual_account = new Individual_Account(accNum, "current", balance);
                     SharedPreferences sharedPreferences = getSharedPreferences("customerUID", Context.MODE_PRIVATE);
                     String customerUID = sharedPreferences.getString("customerUID", "");
-                    FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document("current").set(infor).addOnCompleteListener(task -> {
+                    FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("accounts").document("current").set(infor).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                         }
                     });
@@ -112,14 +115,11 @@ public class SavingsAccountActivity extends AppCompatActivity {
                             Toast.makeText(SavingsAccountActivity.this, "Your acccount has been successfully created", Toast.LENGTH_LONG).show();
                             Intent intent = new Intent(SavingsAccountActivity.this, MainActivity.class);
                             intent.putExtra("customerUID", customerUID);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(intent);
                         }
                     });
                 }
-
-            } else if (accountType.equals("LoanAccount")) {
-
             }
         });
     }
@@ -179,16 +179,5 @@ public class SavingsAccountActivity extends AppCompatActivity {
         return cvv;
     }
 
-    public static String generate() {
-        // Generate random number using SecureRandom
-        SecureRandom secureRandom = new SecureRandom();
-        long randomNumber = secureRandom.nextLong();
 
-        // Format the number to have 16 digits
-        DecimalFormat formatter = new DecimalFormat("00000000000000000");
-        String formattedNumber = formatter.format(randomNumber);
-
-        // return the unique bank account number
-        return formattedNumber;
-    }
 }

@@ -6,6 +6,10 @@ public class Individual_Account implements Serializable {
     private String account_number, type;
     private String balance;
 
+    public Individual_Account() {
+
+    }
+
     public Individual_Account(String account_number, String type, String balance) {
         this.account_number = account_number;
         this.type = type;

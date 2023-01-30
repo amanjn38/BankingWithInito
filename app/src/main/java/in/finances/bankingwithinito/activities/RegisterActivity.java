@@ -146,7 +146,6 @@ public class RegisterActivity extends AppCompatActivity {
         myRef = database.getReference(CUSTOMER_PATH + "/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
         progressDialog.setTitle("Creating profile...");
         progressDialog.show();
-        HashMap<String, Object> infor = new HashMap<>();
 
         String strmail = ((EditText) findViewById(R.id.mail)).getText().toString();
         String strname = ((EditText) findViewById(R.id.name)).getText().toString();
@@ -154,18 +153,9 @@ public class RegisterActivity extends AppCompatActivity {
         String strphone = ((EditText) findViewById(R.id.time_text)).getText().toString();
         String username = ((EditText) findViewById(R.id.username)).getText().toString();
 
-//        infor.put("e", strmail);
-//        infor.put("n", strname);
-//        infor.put("add", straddr);
-//        infor.put("ph", strphone);
-//        infor.put("un", username);
-//        infor.put("lt", latitude);
-//        infor.put("lo", longitude);
-//        infor.put("dob", date1);
-//        infor.put("uid", FirebaseAuth.getInstance().getCurrentUser().getUid());
 
         CustomerDetails customerDetails = new CustomerDetails(strname, straddr, strmail, strphone, username, FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                latitude, longitude, date1);
+                latitude, longitude, date1.getTime());
         FirebaseFirestore.getInstance().collection("customers").document(username).set(customerDetails).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 progressDialog.dismiss();
