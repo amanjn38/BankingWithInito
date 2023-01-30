@@ -13,9 +13,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -25,7 +23,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -71,23 +68,17 @@ public class IndividualTransactionActivity extends AppCompatActivity {
 
             String tranAmt = pref.getString(currentDate, "0");
 
-            if(tranAmt.equals("0"))
-            {
-                editor.putString(currentDate,amt);
+            if (tranAmt.equals("0")) {
+                editor.putString(currentDate, amt);
                 editor.apply();
-            }
-            else
-            {
+            } else {
                 //get the total amount of transaction of current date
                 int totalAmt = Integer.parseInt(tranAmt) + Integer.parseInt(amt);
-                if(totalAmt>50000)
-                {
+                if (totalAmt > 50000) {
                     //display error message
                     Toast.makeText(this, "Withdrawal limit exceeded", Toast.LENGTH_SHORT).show();
-                }
-                else
-                {
-                    editor.putString(currentDate,String.valueOf(totalAmt));
+                } else {
+                    editor.putString(currentDate, String.valueOf(totalAmt));
                     editor.apply();
                     Transaction transaction = new Transaction(System.currentTimeMillis(), "withdrawal", amt);
                     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -95,10 +86,10 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                     docRef.get().addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
-                            Map<String,Object> map = document.getData();
-                            ArrayList<Transaction> arrayList= (ArrayList<Transaction>) map.get("transactions");
+                            Map<String, Object> map = document.getData();
+                            ArrayList<Transaction> arrayList = (ArrayList<Transaction>) map.get("transactions");
                             arrayList.add(transaction);
-                            map.put("arrayListField",arrayList);
+                            map.put("arrayListField", arrayList);
                             map.put("bal", totalAmt);
                             int dt = (int) map.get("dt");
                             dt = dt + 1;
@@ -132,10 +123,10 @@ public class IndividualTransactionActivity extends AppCompatActivity {
 //                    });
                 }
             }
-        }else if(t_type.equalsIgnoreCase("atm_withdraw") && type.equalsIgnoreCase("savings")){
+        } else if (t_type.equalsIgnoreCase("atm_withdraw") && type.equalsIgnoreCase("savings")) {
             String amt = amount.getText().toString();
 
-        }else if(t_type.equalsIgnoreCase("deposit") && type.equalsIgnoreCase("savings")){
+        } else if (t_type.equalsIgnoreCase("deposit") && type.equalsIgnoreCase("savings")) {
             String amt = amount.getText().toString();
 
             Transaction transaction = new Transaction(System.currentTimeMillis(), "deposit", amt);
@@ -145,10 +136,10 @@ public class IndividualTransactionActivity extends AppCompatActivity {
             docRef.get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
-                    Map<String,Object> map = document.getData();
-                    ArrayList<Transaction> arrayList= (ArrayList<Transaction>) map.get("transactions");
+                    Map<String, Object> map = document.getData();
+                    ArrayList<Transaction> arrayList = (ArrayList<Transaction>) map.get("transactions");
                     arrayList.add(transaction);
-                    map.put("transactions",arrayList);
+                    map.put("transactions", arrayList);
                     double balance = (double) map.get("bal");
                     balance = balance + Double.parseDouble(amt);
                     map.put("bal", balance);
@@ -157,7 +148,7 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                     Toast.makeText(this, "Error getting details", Toast.LENGTH_LONG).show();
                 }
             });
-        }else if(t_type.equalsIgnoreCase("deposit") && type.equalsIgnoreCase("current")){
+        } else if (t_type.equalsIgnoreCase("deposit") && type.equalsIgnoreCase("current")) {
             String amt = amount.getText().toString();
 
             Transaction transaction = new Transaction(System.currentTimeMillis(), "deposit", amt);
@@ -167,10 +158,10 @@ public class IndividualTransactionActivity extends AppCompatActivity {
             docRef.get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
-                    Map<String,Object> map = document.getData();
-                    ArrayList<Transaction> arrayList= (ArrayList<Transaction>) map.get("transactions");
+                    Map<String, Object> map = document.getData();
+                    ArrayList<Transaction> arrayList = (ArrayList<Transaction>) map.get("transactions");
                     arrayList.add(transaction);
-                    map.put("transactions",arrayList);
+                    map.put("transactions", arrayList);
                     double balance = (double) map.get("bal");
                     balance = balance + Double.parseDouble(amt);
                     map.put("bal", balance);
@@ -179,8 +170,8 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                     Toast.makeText(this, "Error getting details", Toast.LENGTH_LONG).show();
                 }
             });
-        }else if(t_type.equalsIgnoreCase("withdrawal") && type.equalsIgnoreCase("current")){
-            
+        } else if (t_type.equalsIgnoreCase("withdrawal") && type.equalsIgnoreCase("current")) {
+
         }
         EditText cardNumberInput = findViewById(R.id.cardNumber);
         cardNumberInput.addTextChangedListener(new TextWatcher() {
@@ -248,7 +239,7 @@ public class IndividualTransactionActivity extends AppCompatActivity {
 
     public void checkNRV(double balance) {
         Calendar now = Calendar.getInstance();
-        if(now.get(Calendar.DAY_OF_MONTH) == 28) { // check for 28th of the month
+        if (now.get(Calendar.DAY_OF_MONTH) == 28) { // check for 28th of the month
             double currentNRV = balance + calculateTotalTransaction();
             if (currentNRV < NRV) {
                 double shortfall = NRV - currentNRV;
@@ -256,6 +247,10 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                 balance -= feeToBeCharged;
             }
         }
+    }
+
+    private double calculateTotalTransaction() {
+        return 0.0;
     }
 
 }

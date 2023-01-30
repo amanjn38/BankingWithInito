@@ -7,19 +7,26 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.gson.Gson;
+
+import java.util.List;
 
 import in.finances.bankingwithinito.R;
+import in.finances.bankingwithinito.adapters.AccountsAdapter;
 import in.finances.bankingwithinito.fragments.ATMCardDetailsFragment;
 import in.finances.bankingwithinito.fragments.AboutFragment;
 import in.finances.bankingwithinito.fragments.AccountsListFragment;
 import in.finances.bankingwithinito.fragments.ProfileFragment;
-import in.finances.bankingwithinito.models.CustomerDetails;
+import in.finances.bankingwithinito.models.Individual_Account;
 
 public class MainActivity extends AppCompatActivity implements
         AboutFragment.OnFragmentInteractionListener,
@@ -70,27 +77,28 @@ public class MainActivity extends AppCompatActivity implements
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         addAccount = findViewById(R.id.addAccount);
         customerUID = getIntent().getStringExtra("customerUID");
+
+        System.out.println("CustomerUID " + customerUID);
         SharedPreferences sharedPreferences = getSharedPreferences("customerUID", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("customerUID", customerUID);
         editor.apply();
-
-        FirebaseFirestore.getInstance().collection("customers").document(customerUID).get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        CustomerDetails customerDetails = task.getResult().toObject(CustomerDetails.class);
-
-                        Gson gson = new Gson();
-
-                        String json = gson.toJson(customerDetails);
-                        SharedPreferences sharedPreferences1 = getSharedPreferences("customerDetails", Context.MODE_PRIVATE);
-                        SharedPreferences.Editor editor1 = sharedPreferences1.edit();
-                        editor1.putString("customerDetails", json);
-                        editor1.apply();
+        FirebaseFirestore.getInstance().collection("customers_usernames").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot d = task.getResult();
+                    if (d.contains("username")) {
+                        String customerUID = d.getString("username").toString();
+                        SharedPreferences sharedPreferences = getSharedPreferences("customerUID", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("customerUID", customerUID);
+                        editor.apply();
                     }
-                });
+                }
 
-
+            }
+        });
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                 new AccountsListFragment()).commit();
 

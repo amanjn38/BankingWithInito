@@ -1,6 +1,10 @@
 package in.finances.bankingwithinito.fragments;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,7 +13,11 @@ import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import in.finances.bankingwithinito.R;
+import in.finances.bankingwithinito.activities.LoginActivity;
+import in.finances.bankingwithinito.activities.ReferralActivity;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -64,7 +72,27 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        View view = inflater.inflate(R.layout.fragment_profile, container, false);
+
+        view.findViewById(R.id.logout).setOnClickListener(e -> {
+            auth.signOut();
+            SharedPreferences pref = getActivity().getSharedPreferences("customerUID", MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.clear();
+            editor.apply();
+            Intent mainActivity = new Intent(getContext(), LoginActivity.class);
+            mainActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(mainActivity);
+        });
+
+        view.findViewById(R.id.referAndEarn).setOnClickListener(v -> {
+            Intent mainActivity = new Intent(getContext(), ReferralActivity.class);
+            mainActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(mainActivity);
+        });
+
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

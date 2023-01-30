@@ -1,5 +1,8 @@
 package in.finances.bankingwithinito.activities;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -20,7 +23,7 @@ import in.finances.bankingwithinito.models.Transaction;
 
 public class SavingsAccountActivity extends AppCompatActivity {
 
-    public String balance, error_msg, customerUID, accountType;
+    public String balance, error_msg, accountType;
     private TextView createAccount;
 
     @Override
@@ -62,6 +65,9 @@ public class SavingsAccountActivity extends AppCompatActivity {
                     infor.put("accnum", accNum);
 
                     Individual_Account individual_account = new Individual_Account(accNum, "savings", balance);
+
+                    SharedPreferences sharedPreferences = getSharedPreferences("customerUID", Context.MODE_PRIVATE);
+                    String customerUID = sharedPreferences.getString("customerUID", "");
                     FirebaseFirestore.getInstance().collection("customers").document(customerUID).collection("savings").document(accNum).set(infor).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             Toast.makeText(SavingsAccountActivity.this, "Your acccount has been successfully created", Toast.LENGTH_LONG).show();
@@ -71,6 +77,10 @@ public class SavingsAccountActivity extends AppCompatActivity {
                     FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").add(individual_account).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             Toast.makeText(SavingsAccountActivity.this, "Your acccount has been successfully created", Toast.LENGTH_LONG).show();
+                            Intent intent = new Intent(SavingsAccountActivity.this, MainActivity.class);
+                            intent.putExtra("customerUID", customerUID);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
                         }
                     });
 
@@ -91,14 +101,19 @@ public class SavingsAccountActivity extends AppCompatActivity {
 
                     infor.put("accnum", accNum);
                     Individual_Account individual_account = new Individual_Account(accNum, "current", balance);
+                    SharedPreferences sharedPreferences = getSharedPreferences("customerUID", Context.MODE_PRIVATE);
+                    String customerUID = sharedPreferences.getString("customerUID", "");
                     FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document("current").set(infor).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            Toast.makeText(SavingsAccountActivity.this, "Your acccount has been successfully created", Toast.LENGTH_LONG).show();
                         }
                     });
                     FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").add(individual_account).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             Toast.makeText(SavingsAccountActivity.this, "Your acccount has been successfully created", Toast.LENGTH_LONG).show();
+                            Intent intent = new Intent(SavingsAccountActivity.this, MainActivity.class);
+                            intent.putExtra("customerUID", customerUID);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
                         }
                     });
                 }

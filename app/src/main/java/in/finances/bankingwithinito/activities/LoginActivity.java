@@ -25,14 +25,14 @@ import in.finances.bankingwithinito.R;
 
 public class LoginActivity extends AppCompatActivity {
 
-//    private final static int RC_SIGN_IN = 2;
-//    private boolean fromRegisterActivity;
+    //    private final static int RC_SIGN_IN = 2;
+    private boolean fromRegisterActivity;
 //    private ProgressDialog progressDialog;
 //    private String TAG = "LoginActivity";
 //    private ImageView log_in_button;
 //    public String ROOT_UID = "";
 
-    private String email, password, errMsg = "", customerUID;
+    private String email, password, errMsg = "", customerUID, customerUIDRegister;
     private EditText cUID;
     private ProgressDialog progressDialog;
     private FirebaseAuth auth;
@@ -50,8 +50,10 @@ public class LoginActivity extends AppCompatActivity {
 
         cUID = findViewById(R.id.email);
         customerUID = cUID.getText().toString();
-        boolean update = getIntent().getBooleanExtra("update", false);
-
+        fromRegisterActivity = getIntent().getBooleanExtra("fromRegisterActivity", false);
+        if (fromRegisterActivity) {
+            customerUIDRegister = getIntent().getStringExtra("customerUID");
+        }
         if (auth.getCurrentUser() == null) {
             System.out.println("Working");
             progressDialog.setTitle("Authenticating...");
@@ -93,7 +95,9 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             System.out.println("Working22");
             ROOT_UID = auth.getUid();
+
             Intent fragment = new Intent(this, MainActivity.class);
+            fragment.putExtra("customerUID", customerUIDRegister);
             startActivity(fragment);
             finish();
         }

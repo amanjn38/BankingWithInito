@@ -8,11 +8,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,23 +86,41 @@ public class AccountsListFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_accounts_list_activity, container, false);
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("customerUID", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("customerUID", Context.MODE_PRIVATE);
         String customerUID = sharedPreferences.getString("customerUID", "");
 
+        individual_accounts = new ArrayList<>();
+        recyclerView = view.findViewById(R.id.recycler_view);
         layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
-        FirebaseFirestore.getInstance().collection("customers").document(customerUID).collection("accounts").get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        List<Individual_Account> snapshotCoupons = task.getResult().toObjects(Individual_Account.class);
-                        individual_accounts.addAll(snapshotCoupons);
+        FirebaseFirestore.getInstance().collection("customers_usernames").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot d = task.getResult();
+                    if (d.contains("username")) {
+                        String customerUID = d.getString("username").toString();
+                        FirebaseFirestore.getInstance().collection("customers").document(customerUID).collection("accounts").get()
+                                .addOnCompleteListener(task1 -> {
+                                    if (task1.isSuccessful()) {
+                                        List<Individual_Account> snapshotCoupons = task1.getResult().toObjects(Individual_Account.class);
+                                        individual_accounts.addAll(snapshotCoupons);
+                                    }
+                                    AccountsAdapter accountsAdapter = new AccountsAdapter(individual_accounts, getContext());
+                                    recyclerView.setAdapter(accountsAdapter);
+                                    accountsAdapter.notifyDataSetChanged();
+                                });
+
                     }
-//                    Log.d("couponfrag1", coupons.toString());
-                    AccountsAdapter accountsAdapter = new AccountsAdapter(individual_accounts, getContext());
-                    recyclerView.setAdapter(accountsAdapter);
-                    accountsAdapter.notifyDataSetChanged();
-                });
+                }
+            }
+        });
+
+        System.out.println("CustomerUID Fragment" + customerUID);
+        if (customerUID != null) {
+
+        }
 
         return view;
     }

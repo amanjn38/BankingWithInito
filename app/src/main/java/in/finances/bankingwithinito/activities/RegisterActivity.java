@@ -7,7 +7,9 @@ import static in.finances.bankingwithinito.models.SharedClass.Phone;
 
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -70,7 +72,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance();
         FirebaseAuth auth = FirebaseAuth.getInstance();
-        String phoneNumber = "7310919162";
 
         update = getIntent().getBooleanExtra("update", false);
         Places.initialize(RegisterActivity.this, "AIzaSyAzScFoOmgLSQsVPK7QT4btN9wIhjoP4qM");
@@ -169,9 +170,23 @@ public class RegisterActivity extends AppCompatActivity {
             if (task.isSuccessful()) {
                 progressDialog.dismiss();
                 Toast.makeText(RegisterActivity.this, "Your data has been stored successfully", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                intent.putExtra("fromRegisterActivity", true);
-                startActivity(intent);
+                SharedPreferences sharedPreferences = getSharedPreferences("customerUID", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("customerUID", username);
+                editor.apply();
+                HashMap<String, String> map = new HashMap<>();
+                map.put("username", username);
+                FirebaseFirestore.getInstance().collection("customers_usernames").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).set(map).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                            intent.putExtra("fromRegisterActivity", true);
+                            intent.putExtra("customerUID", username);
+                            startActivity(intent);
+                        }
+                    }
+                });
             }
         });
     }
@@ -215,7 +230,6 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-
         if ((requestCode == 1) && resultCode == RESULT_OK && null != data) {
             Uri selectedImage = data.getData();
 
@@ -229,7 +243,6 @@ public class RegisterActivity extends AppCompatActivity {
             String picturePath = cursor.getString(columnIndex);
             cursor.close();
 
-//            currentPhotoPath = picturePath;
         }
 
         if (requestCode == AUTOCOMPLETE_SOURCE) {
@@ -254,7 +267,6 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-
         savedInstanceState.putString(Name, ((EditText) findViewById(R.id.name)).getText().toString());
         savedInstanceState.putString(Mail, ((EditText) findViewById(R.id.mail)).getText().toString());
         savedInstanceState.putString(Phone, ((EditText) findViewById(R.id.time_text)).getText().toString());
@@ -263,12 +275,9 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
         ((EditText) findViewById(R.id.name)).setText(savedInstanceState.getString(Name));
         ((EditText) findViewById(R.id.mail)).setText(savedInstanceState.getString(Mail));
         ((EditText) findViewById(R.id.time_text)).setText(savedInstanceState.getString(Phone));
-
-
     }
 
     private String generateId() {

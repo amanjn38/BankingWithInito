@@ -24,12 +24,14 @@ public class CreateNewAccountActivity extends AppCompatActivity {
         savings.setOnClickListener(view -> {
             Intent intent = new Intent(CreateNewAccountActivity.this, SavingsAccountActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("accountType", "SavingsAccount");
             startActivity(intent);
         });
 
         current.setOnClickListener(view -> {
-            Intent intent = new Intent(CreateNewAccountActivity.this, AccountDetailsActivity.class);
+            Intent intent = new Intent(CreateNewAccountActivity.this, SavingsAccountActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("accountType", "CurrentAccount");
             startActivity(intent);
         });
 
