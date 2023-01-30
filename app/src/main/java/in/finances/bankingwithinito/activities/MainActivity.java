@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements
 
                         String json = gson.toJson(customerDetails);
                         SharedPreferences sharedPreferences1 = getSharedPreferences("customerDetails", Context.MODE_PRIVATE);
-                        SharedPreferences.Editor editor1 = sharedPreferences.edit();
+                        SharedPreferences.Editor editor1 = sharedPreferences1.edit();
                         editor1.putString("customerDetails", json);
                         editor1.apply();
                     }

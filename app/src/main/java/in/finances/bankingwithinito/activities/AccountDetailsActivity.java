@@ -46,7 +46,12 @@ public class AccountDetailsActivity extends AppCompatActivity {
         });
 
         deposit.setOnClickListener(view -> {
-
+            Intent intent = new Intent(AccountDetailsActivity.this, IndividualTransactionActivity.class);
+            intent.putExtra("account_number", accNum);
+            intent.putExtra("balance", balance);
+            intent.putExtra("account_type", type);
+            intent.putExtra("type", "deposit");
+            startActivity(intent);
         });
     }
 

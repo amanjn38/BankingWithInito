@@ -41,14 +41,17 @@ public class SavingsAccountActivity extends AppCompatActivity {
                     int ttatm = 0;
                     int dt = 0;
                     Long lastOpened = 0L;
+                    Long lastInterestCal = 0L;
+
                     ArrayList<Transaction> transactions = new ArrayList<>();
 
                     infor.put("bal", balance);
                     infor.put("awiad", awiad);
                     infor.put("ttatm", ttatm);
                     infor.put("dt", dt);
-                    infor.put("lastopened", lastOpened);
+                    infor.put("lastTransaction", lastOpened);
                     infor.put("transactions", transactions);
+                    infor.put("lastInterestCal", lastInterestCal);
                     String card_number = generateCardNumber();
                     String expiryDate = generateExpiry();
                     String cvv = generateCVV();
