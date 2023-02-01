@@ -14,11 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.security.SecureRandom;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
 
 import in.finances.bankingwithinito.R;
 import in.finances.bankingwithinito.models.Individual_Account;
@@ -66,7 +63,7 @@ public class SavingsAccountActivity extends AppCompatActivity {
                     infor.put("expiry", expiryDate);
                     infor.put("cvv", cvv);
                     infor.put("accnum", accNum);
-
+                    infor.put("dateCreated", System.currentTimeMillis());
                     Individual_Account individual_account = new Individual_Account(accNum, "savings", balance);
 
                     SharedPreferences sharedPreferences = getSharedPreferences("customerUID", Context.MODE_PRIVATE);
@@ -77,7 +74,7 @@ public class SavingsAccountActivity extends AppCompatActivity {
                         }
                     });
 
-                    FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").add(individual_account).addOnCompleteListener(task -> {
+                    FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document(accNum).set(individual_account).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             Toast.makeText(SavingsAccountActivity.this, "Your acccount has been successfully created", Toast.LENGTH_LONG).show();
                             Intent intent = new Intent(SavingsAccountActivity.this, MainActivity.class);
@@ -110,7 +107,7 @@ public class SavingsAccountActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                         }
                     });
-                    FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").add(individual_account).addOnCompleteListener(task -> {
+                    FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document(accNum).set(individual_account).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             Toast.makeText(SavingsAccountActivity.this, "Your acccount has been successfully created", Toast.LENGTH_LONG).show();
                             Intent intent = new Intent(SavingsAccountActivity.this, MainActivity.class);

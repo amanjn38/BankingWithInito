@@ -63,7 +63,8 @@
                         android:layout_height="wrap_content"
                         android:backgroundTint="#ffffff"
                         android:ems="10"
-                        android:enabled="false" />
+                        android:enabled="false"
+                        android:visibility="gone" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -175,8 +176,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:backgroundTint="#ffffff"
-                        android:ems="10"
-                        />
+                        android:ems="10" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
@@ -255,5 +255,31 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
+        <TextView
+            android:id="@+id/txt3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="48dp"
+            android:text="Already have an account ?"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/card" />
+
+
+        <TextView
+            android:id="@+id/sign_in"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="48dp"
+            android:padding="8dp"
+            android:text="SIGN IN"
+            android:textColor="@color/colorPrimaryDark"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/txt3" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

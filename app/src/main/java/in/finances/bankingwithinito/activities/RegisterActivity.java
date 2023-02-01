@@ -64,12 +64,20 @@ public class RegisterActivity extends AppCompatActivity {
     private static Random random = new Random();
     private int year, month, day;
     private Date date1;
+    private TextView signin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        signin = findViewById(R.id.sign_in);
+
+        signin.setOnClickListener(view -> {
+            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        });
         database = FirebaseDatabase.getInstance();
         FirebaseAuth auth = FirebaseAuth.getInstance();
 
@@ -94,6 +102,7 @@ public class RegisterActivity extends AppCompatActivity {
                 strusername.setText(username);
                 generateUID.setVisibility(View.GONE);
                 confirm_reg.setVisibility(View.VISIBLE);
+                strusername.setVisibility(View.VISIBLE);
             }
         });
 
@@ -110,6 +119,10 @@ public class RegisterActivity extends AppCompatActivity {
         });
 
         confirm_reg.setOnClickListener(e -> {
+            final ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.setTitle("Please wait..");
+            progressDialog.setMessage("While we are creating your account..");
+            progressDialog.show();
             if (checkFields()) {
                 if (!update) {
                     auth.createUserWithEmailAndPassword(mail, psw).addOnCompleteListener(this, task -> {
@@ -121,6 +134,7 @@ public class RegisterActivity extends AppCompatActivity {
                                         Toast.makeText(RegisterActivity.this, "Registered successfully, Please verify your email.", Toast.LENGTH_LONG).show();
                                         ROOT_UID = auth.getUid();
                                         storeDatabase();
+                                        progressDialog.dismiss();
                                     } else {
                                         Toast.makeText(RegisterActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
                                     }
@@ -141,11 +155,10 @@ public class RegisterActivity extends AppCompatActivity {
 
 
     private void storeDatabase() {
-        final ProgressDialog progressDialog = new ProgressDialog(this);
+
         date1 = getDate(year, month, day);
         myRef = database.getReference(CUSTOMER_PATH + "/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
-        progressDialog.setTitle("Creating profile...");
-        progressDialog.show();
+
 
         String strmail = ((EditText) findViewById(R.id.mail)).getText().toString();
         String strname = ((EditText) findViewById(R.id.name)).getText().toString();
@@ -158,7 +171,6 @@ public class RegisterActivity extends AppCompatActivity {
                 latitude, longitude, date1.getTime());
         FirebaseFirestore.getInstance().collection("customers").document(username).set(customerDetails).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                progressDialog.dismiss();
                 Toast.makeText(RegisterActivity.this, "Your data has been stored successfully", Toast.LENGTH_LONG).show();
                 SharedPreferences sharedPreferences = getSharedPreferences("customerUID", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();

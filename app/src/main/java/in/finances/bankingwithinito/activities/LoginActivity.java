@@ -25,13 +25,7 @@ import in.finances.bankingwithinito.R;
 
 public class LoginActivity extends AppCompatActivity {
 
-    //    private final static int RC_SIGN_IN = 2;
     private boolean fromRegisterActivity;
-//    private ProgressDialog progressDialog;
-//    private String TAG = "LoginActivity";
-//    private ImageView log_in_button;
-//    public String ROOT_UID = "";
-
     private String email, password, errMsg = "", customerUID, customerUIDRegister;
     private EditText cUID;
     private ProgressDialog progressDialog;

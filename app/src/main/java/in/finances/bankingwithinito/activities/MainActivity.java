@@ -15,18 +15,19 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.List;
+import java.util.Calendar;
+import java.util.HashMap;
 
 import in.finances.bankingwithinito.R;
-import in.finances.bankingwithinito.adapters.AccountsAdapter;
 import in.finances.bankingwithinito.fragments.ATMCardDetailsFragment;
 import in.finances.bankingwithinito.fragments.AboutFragment;
 import in.finances.bankingwithinito.fragments.AccountsListFragment;
 import in.finances.bankingwithinito.fragments.ProfileFragment;
-import in.finances.bankingwithinito.models.Individual_Account;
 
 public class MainActivity extends AppCompatActivity implements
         AboutFragment.OnFragmentInteractionListener,
@@ -108,6 +109,143 @@ public class MainActivity extends AppCompatActivity implements
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
         });
+
+        //savings account interest Calculation
+        Calendar calendar = Calendar.getInstance();
+        int currentDay = calendar.get(Calendar.DAY_OF_MONTH);
+        if (currentDay == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)) {
+            FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("savings").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot documentSnapshot : task.getResult()) {
+                            long dateCreated = documentSnapshot.getLong("dateCreated");
+                            double bal = documentSnapshot.getDouble("bal");
+                            int lastInt = (int) documentSnapshot.get("lastInterestCal");
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTimeInMillis(dateCreated);
+                            int month = calendar.get(Calendar.MONTH);
+
+                            int currentMonth = calendar.get(Calendar.MONTH);
+                            if (lastInt == 0) {
+                                double interest = bal * 0.06 / 12 * (currentMonth - month);
+                                bal += interest;
+                            } else {
+                                double interest = bal * 0.06 / 12 * (currentMonth - lastInt);
+                                bal += interest;
+                            }
+                            String accNum = documentSnapshot.getString("accnum");
+                            FirebaseFirestore db = FirebaseFirestore.getInstance();
+                            DocumentReference docRef = db.collection("customers").document(customerUID).collection("savings").document(accNum);
+
+                            HashMap<String, Object> map = new HashMap<>();
+                            map.put("bal", bal);
+                            map.put("lastInterestCal", currentMonth);
+
+                            docRef.update(map).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        }
+
+        if (currentDay == 28) {
+            FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("savings").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot documentSnapshot : task.getResult()) {
+                            double bal = documentSnapshot.getDouble("bal");
+                            double penalty = 0;
+                            if (bal == 0.0) {
+                                penalty = 1000;
+                            } else if (bal > 100000) {
+                                penalty = 0;
+                            } else {
+                                penalty = (1000 * bal) / 100000;
+                            }
+                            bal = bal - penalty;
+                            String accNum = documentSnapshot.getString("accnum");
+                            FirebaseFirestore db = FirebaseFirestore.getInstance();
+                            DocumentReference docRef = db.collection("customers").document(customerUID).collection("savings").document(accNum);
+                            HashMap<String, Object> map = new HashMap<>();
+                            map.put("bal", bal);
+                            docRef.update(map).addOnCompleteListener(task1 -> {
+
+                            });
+                        }
+                    }
+                }
+            });
+
+            FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("current").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot documentSnapshot : task.getResult()) {
+                            double bal = documentSnapshot.getDouble("bal");
+                            double penalty = 0;
+                            if (bal == 0.0) {
+                                penalty = 5000;
+                            } else if (bal > 500000) {
+                                penalty = 0;
+                            } else {
+                                penalty = (5000 * bal) / 500000;
+                            }
+                            bal = bal - penalty;
+                            String accNum = documentSnapshot.getString("accnum");
+                            FirebaseFirestore db = FirebaseFirestore.getInstance();
+                            DocumentReference docRef = db.collection("customers").document(customerUID).collection("current").document(accNum);
+                            HashMap<String, Object> map = new HashMap<>();
+                            map.put("bal", bal);
+                            docRef.update(map).addOnCompleteListener(task1 -> {
+
+                            });
+                        }
+                    }
+                }
+            });
+
+        }
+        //loan account interest calculation
+        final java.util.Date currentDate11 = calendar.getTime();
+        if (currentDay == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)) {
+            FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("loan").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot documentSnapshot : task.getResult()) {
+                            double balance = documentSnapshot.getDouble("bal");
+                            double interestRate = documentSnapshot.getDouble("interest_rate");
+                            java.util.Date lastInterestCalculationDate = documentSnapshot.getDate("lastInterestCalculationDate");
+
+                            // Calculate the number of half-years since the last interest calculation
+                            long timeSinceLastInterestCalculation = currentDate11.getTime() - lastInterestCalculationDate.getTime();
+                            int numHalfYears = (int) (timeSinceLastInterestCalculation / (365.25 / 2 * 24 * 60 * 60 * 1000));
+
+                            // Calculate the compounded interest
+                            for (int i = 0; i < numHalfYears; i++) {
+                                balance *= (1 + interestRate / 2);
+                            }
+                            String accNum = documentSnapshot.getString("accnum");
+                            FirebaseFirestore db = FirebaseFirestore.getInstance();
+                            DocumentReference docRef = db.collection("customers").document(customerUID).collection("current").document(accNum);
+                            HashMap<String, Object> map = new HashMap<>();
+                            map.put("bal", balance);
+                            map.put("lastInterestCalculationDate", currentDate11);
+                            docRef.update(map).addOnCompleteListener(task1 -> {
+
+                            });
+                        }
+                    }
+                }
+            });
+        }
     }
 
     @Override

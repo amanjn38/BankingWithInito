@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -39,9 +38,15 @@ public class AccountsAdapter extends RecyclerView.Adapter<AccountsAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Individual_Account individual_account = individual_accounts.get(position);
-        holder.account_type.setText(individual_account.getType());
-        holder.balance.setText(individual_account.getBalance());
-        holder.account_number.setText(individual_account.getAccount_number());
+        if (individual_account.getType().equals("savings")) {
+            holder.account_type.setText("Savings Acccount");
+        } else if (individual_account.getType().equals("loan")) {
+            holder.account_type.setText("Loan Acccount");
+        } else if (individual_account.getType().equals("current")) {
+            holder.account_type.setText("Current Acccount");
+        }
+        holder.balance.setText("Balance : " + individual_account.getBalance());
+        holder.account_number.setText("Acc. Num : " + individual_account.getAccount_number());
 
         holder.cardView.setOnClickListener(view -> {
             Intent intent = new Intent(context, AccountDetailsActivity.class);

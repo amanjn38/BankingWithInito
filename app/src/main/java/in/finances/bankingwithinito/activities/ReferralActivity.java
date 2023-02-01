@@ -1,14 +1,25 @@
 package in.finances.bankingwithinito.activities;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 
 import in.finances.bankingwithinito.R;
 
 public class ReferralActivity extends AppCompatActivity {
+
+    private TextView generateReferralCode, referralCode;
+    private EditText accNum;
 
     private static final HashMap<Character, Integer> letterValues = new HashMap<Character, Integer>() {{
         put('A', 1);
@@ -43,6 +54,31 @@ public class ReferralActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_referral);
+
+        generateReferralCode = findViewById(R.id.generateReferralCode);
+        referralCode = findViewById(R.id.referralCode);
+        accNum = findViewById(R.id.accNum);
+        generateReferralCode.setOnClickListener(view -> {
+            String acc = accNum.getText().toString();
+            if (acc.length() != 16) {
+                Toast.makeText(this, "Please enter 16 digit account number", Toast.LENGTH_LONG).show();
+            } else {
+                SharedPreferences sharedPreferences = getSharedPreferences("customerUID", Context.MODE_PRIVATE);
+                String customerUID = sharedPreferences.getString("customerUID", "");
+                FirebaseFirestore.getInstance().collection("customers").document(customerUID).get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.contains("n")) {
+                            String name = document.getString("n");
+                            String[] arr = name.split(" ");
+                            int ref = computeReferralCode(arr[0]);
+                            referralCode.setText(ref);
+                        }
+                    }
+                });
+            }
+        });
+
     }
 
     public static int computeReferralCode(String name) {
