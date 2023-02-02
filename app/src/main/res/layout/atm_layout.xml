@@ -35,16 +35,19 @@
                 android:padding="16dp">
 
                 <TextView
+                    android:id="@+id/atmCardNumber"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="ATM Card Number: **** **** **** 1234" />
 
                 <TextView
+                    android:id="@+id/cvvNumber"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="CVV: 123" />
 
                 <TextView
+                    android:id="@+id/expiryDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Expiry Date: 12/24" />

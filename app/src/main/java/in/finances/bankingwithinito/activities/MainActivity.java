@@ -25,18 +25,17 @@ import java.util.HashMap;
 
 import in.finances.bankingwithinito.R;
 import in.finances.bankingwithinito.fragments.ATMCardDetailsFragment;
-import in.finances.bankingwithinito.fragments.AboutFragment;
 import in.finances.bankingwithinito.fragments.AccountsListFragment;
 import in.finances.bankingwithinito.fragments.ProfileFragment;
 
 public class MainActivity extends AppCompatActivity implements
-        AboutFragment.OnFragmentInteractionListener,
         AccountsListFragment.OnFragmentInteractionListener,
         ProfileFragment.OnFragmentInteractionListener,
         ATMCardDetailsFragment.OnFragmentInteractionListener {
 
     private String customerUID;
     private FloatingActionButton addAccount;
+    private boolean fromProfileActivity;
 
     @SuppressLint("NonConstantResourceId")
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -60,11 +59,6 @@ public class MainActivity extends AppCompatActivity implements
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new ATMCardDetailsFragment()).commit();
                 }
                 return true;
-            case R.id.navigation_about:
-                if (!(getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof AboutFragment)) {
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new AboutFragment()).commit();
-                }
-                return true;
         }
         return false;
     };
@@ -78,7 +72,12 @@ public class MainActivity extends AppCompatActivity implements
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         addAccount = findViewById(R.id.addAccount);
         customerUID = getIntent().getStringExtra("customerUID");
+        fromProfileActivity = getIntent().getBooleanExtra("fromProfileActivity", false);
 
+        if (fromProfileActivity) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                    new ProfileFragment()).commit();
+        }
         System.out.println("CustomerUID " + customerUID);
         SharedPreferences sharedPreferences = getSharedPreferences("customerUID", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();

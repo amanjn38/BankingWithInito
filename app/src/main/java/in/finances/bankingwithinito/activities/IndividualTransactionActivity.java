@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -15,16 +14,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -36,7 +32,7 @@ import in.finances.bankingwithinito.models.Transaction;
 
 public class IndividualTransactionActivity extends AppCompatActivity {
 
-    private TextView transaction_type;
+    private TextView transaction_type, completeTransaction;
     public String balance, error_msg, customerUID, type, accNum, t_type, daily_limit;
     private LinearLayout ll;
     private EditText amount, cardNumber, cvv, expiryDate;
@@ -63,120 +59,124 @@ public class IndividualTransactionActivity extends AppCompatActivity {
             ll.setVisibility(View.VISIBLE);
         }
 
-        if (t_type.equalsIgnoreCase("normal_withdraw") && type.equalsIgnoreCase("savings")) {
-            String amt = amount.getText().toString();
+        completeTransaction = findViewById(R.id.completeTransaction);
+        completeTransaction.setOnClickListener(view -> {
+            if (t_type.equalsIgnoreCase("normal_withdraw") && type.equalsIgnoreCase("savings")) {
+                String amt = amount.getText().toString();
 
-            SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0);
-            SharedPreferences.Editor editor = pref.edit();
+                SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0);
+                SharedPreferences.Editor editor = pref.edit();
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            String currentDate = dateFormat.format(new Date());
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                String currentDate = dateFormat.format(new Date());
 
-            String tranAmt = pref.getString(currentDate, "0");
+                String tranAmt = pref.getString(currentDate, "0");
 
-            if (tranAmt.equals("0")) {
-                if (Double.parseDouble(amt) <= 20000) {
+                if (tranAmt.equals("0")) {
+                    if (Double.parseDouble(amt) <= 20000) {
+                        editor.putString(currentDate, amt);
+                        editor.apply();
+                        normal_withdraw(amt);
+                    } else {
+                        Toast.makeText(this, "The maximum withdrawal limit is Rs. 50000 for a day", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    //get the total amount of transaction of current date
+                    System.out.println("withdrawal testing" + tranAmt + "   " + amt);
+                    int totalAmt = Integer.parseInt(tranAmt) + Integer.parseInt(amt);
+                    if (totalAmt > 50000) {
+                        Toast.makeText(this, "Withdrawal limit exceeded", Toast.LENGTH_SHORT).show();
+                    } else {
+                        editor.putString(currentDate, String.valueOf(totalAmt));
+                        editor.apply();
+                        normal_withdraw(amt);
+                    }
+                }
+            } else if (t_type.equalsIgnoreCase("atm_withdraw") && type.equalsIgnoreCase("savings")) {
+                String amt = amount.getText().toString();
+                SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0);
+                SharedPreferences.Editor editor = pref.edit();
+
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                String currentDate = dateFormat.format(new Date());
+
+                String tranAmt = pref.getString(currentDate, "0");
+                if (tranAmt.equals("0")) {
                     editor.putString(currentDate, amt);
                     editor.apply();
-                    normal_withdraw(amt);
-                } else {
-                    Toast.makeText(this, "The maximum withdrawal limit is Rs. 50000 for a day", Toast.LENGTH_LONG).show();
-                }
-            } else {
-                //get the total amount of transaction of current date
-                int totalAmt = Integer.parseInt(tranAmt) + Integer.parseInt(amt);
-                if (totalAmt > 50000) {
-                    Toast.makeText(this, "Withdrawal limit exceeded", Toast.LENGTH_SHORT).show();
-                } else {
-                    editor.putString(currentDate, String.valueOf(totalAmt));
-                    editor.apply();
-                    normal_withdraw(amt);
-                }
-            }
-        } else if (t_type.equalsIgnoreCase("atm_withdraw") && type.equalsIgnoreCase("savings")) {
-            String amt = amount.getText().toString();
-            SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0);
-            SharedPreferences.Editor editor = pref.edit();
-
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            String currentDate = dateFormat.format(new Date());
-
-            String tranAmt = pref.getString(currentDate, "0");
-            if (tranAmt.equals("0")) {
-                editor.putString(currentDate, amt);
-                editor.apply();
-                atm_withdraw(amt);
-            } else {
-                //get the total amount of transaction of current date
-                int totalAmt = Integer.parseInt(tranAmt) + Integer.parseInt(amt);
-                if (totalAmt > 50000) {
-                    //display error message
-                    Toast.makeText(this, "Withdrawal limit exceeded", Toast.LENGTH_SHORT).show();
-                } else {
                     atm_withdraw(amt);
-                }
-            }
-
-        } else if (t_type.equalsIgnoreCase("deposit") && type.equalsIgnoreCase("savings")) {
-            String amt = amount.getText().toString();
-
-            Transaction transaction = new Transaction(System.currentTimeMillis(), "deposit", amt);
-
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-            DocumentReference docRef = db.collection("customers").document(customerUID).collection("savings").document(accNum);
-            docRef.get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    Map<String, Object> map = document.getData();
-                    ArrayList<Transaction> arrayList = (ArrayList<Transaction>) map.get("transactions");
-                    arrayList.add(transaction);
-                    map.put("transactions", arrayList);
-                    double balance = (double) map.get("bal");
-                    balance = balance + Double.parseDouble(amt);
-                    map.put("bal", balance);
-                    HashMap<String, Object> infor = new HashMap<>();
-                    infor.put("balance", balance);
-
-                    FirebaseFirestore.getInstance().collection("customers_accounts").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
-                        if (task1.isSuccessful()) {
-                            Toast.makeText(IndividualTransactionActivity.this, "", Toast.LENGTH_LONG).show();
-                        }
-                    });
-                    docRef.update(map).addOnSuccessListener(aVoid -> Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show());
                 } else {
-                    Toast.makeText(this, "Error getting details", Toast.LENGTH_LONG).show();
+                    //get the total amount of transaction of current date
+                    int totalAmt = Integer.parseInt(tranAmt) + Integer.parseInt(amt);
+                    if (totalAmt > 50000) {
+                        //display error message
+                        Toast.makeText(this, "Withdrawal limit exceeded", Toast.LENGTH_SHORT).show();
+                    } else {
+                        atm_withdraw(amt);
+                    }
                 }
-            });
 
-        } else if (t_type.equalsIgnoreCase("deposit") && type.equalsIgnoreCase("current")) {
-            String amt = amount.getText().toString();
-            Transaction transaction = new Transaction(System.currentTimeMillis(), "deposit", amt);
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-            DocumentReference docRef = db.collection("customers").document(customerUID).collection("current").document(accNum);
-            docRef.get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    Map<String, Object> map = document.getData();
-                    ArrayList<Transaction> arrayList = (ArrayList<Transaction>) map.get("transactions");
-                    arrayList.add(transaction);
-                    map.put("transactions", arrayList);
-                    double balance = (double) map.get("bal");
-                    balance = balance + Double.parseDouble(amt);
-                    map.put("bal", balance);
-                    HashMap<String, Object> infor = new HashMap<>();
-                    infor.put("balance", balance);
+            } else if (t_type.equalsIgnoreCase("deposit") && type.equalsIgnoreCase("savings")) {
+                String amt = amount.getText().toString();
+                Double a = Double.parseDouble(amt);
+                Transaction transaction = new Transaction(System.currentTimeMillis(), "deposit", a);
 
-                    FirebaseFirestore.getInstance().collection("customers_accounts").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
-                        if (task1.isSuccessful()) {
-                            Toast.makeText(IndividualTransactionActivity.this, "", Toast.LENGTH_LONG).show();
-                        }
-                    });
-                    docRef.update(map).addOnSuccessListener(aVoid -> Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show());
-                } else {
-                    Toast.makeText(this, "Error getting details", Toast.LENGTH_LONG).show();
-                }
-            });
-        } else if (t_type.equalsIgnoreCase("withdrawal") && type.equalsIgnoreCase("current")) {
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                DocumentReference docRef = db.collection("customers").document(customerUID).collection("savings").document(accNum);
+                docRef.get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        Map<String, Object> map = document.getData();
+                        ArrayList<Transaction> arrayList = (ArrayList<Transaction>) map.get("transactions");
+                        arrayList.add(transaction);
+                        map.put("transactions", arrayList);
+                        double balance = (double) map.get("bal");
+                        balance = balance + Double.parseDouble(amt);
+                        map.put("bal", balance);
+                        HashMap<String, Object> infor = new HashMap<>();
+                        infor.put("balance", balance);
+
+                        FirebaseFirestore.getInstance().collection("customers_accounts").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
+                            if (task1.isSuccessful()) {
+                                Toast.makeText(IndividualTransactionActivity.this, "", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        docRef.update(map).addOnSuccessListener(aVoid -> Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show());
+                    } else {
+                        Toast.makeText(this, "Error getting details", Toast.LENGTH_LONG).show();
+                    }
+                });
+
+            } else if (t_type.equalsIgnoreCase("deposit") && type.equalsIgnoreCase("current")) {
+                String amt = amount.getText().toString();
+                Double a = Double.parseDouble(amt);
+                Transaction transaction = new Transaction(System.currentTimeMillis(), "deposit", a);
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                DocumentReference docRef = db.collection("customers").document(customerUID).collection("current").document(accNum);
+                docRef.get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        Map<String, Object> map = document.getData();
+                        ArrayList<Transaction> arrayList = (ArrayList<Transaction>) map.get("transactions");
+                        arrayList.add(transaction);
+                        map.put("transactions", arrayList);
+                        double balance = (double) map.get("bal");
+                        balance = balance + Double.parseDouble(amt);
+                        map.put("bal", balance);
+                        HashMap<String, Object> infor = new HashMap<>();
+                        infor.put("balance", balance);
+
+                        FirebaseFirestore.getInstance().collection("customers_accounts").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
+                            if (task1.isSuccessful()) {
+                                Toast.makeText(IndividualTransactionActivity.this, "", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        docRef.update(map).addOnSuccessListener(aVoid -> Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show());
+                    } else {
+                        Toast.makeText(this, "Error getting details", Toast.LENGTH_LONG).show();
+                    }
+                });
+            } else if (t_type.equalsIgnoreCase("withdrawal") && type.equalsIgnoreCase("current")) {
 //            FirebaseFirestore db = FirebaseFirestore.getInstance();
 //
 //            // Get the current account document
@@ -286,9 +286,8 @@ public class IndividualTransactionActivity extends AppCompatActivity {
 //                            });
 //                        }
 //                    });
-
-
-        }
+            }
+        });
         EditText cardNumberInput = findViewById(R.id.cardNumber);
         cardNumberInput.addTextChangedListener(new TextWatcher() {
             private static final char space = ' ';
@@ -354,7 +353,8 @@ public class IndividualTransactionActivity extends AppCompatActivity {
     }
 
     private void normal_withdraw(String amt) {
-        Transaction transaction = new Transaction(System.currentTimeMillis(), "withdrawal", amt);
+        Double a = Double.parseDouble(amt);
+        Transaction transaction = new Transaction(System.currentTimeMillis(), "withdrawal", a);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         DocumentReference docRef = db.collection("customers_account_spec").document(customerUID).collection("savings").document(accNum);
@@ -364,7 +364,8 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                 Map<String, Object> map = document.getData();
                 ArrayList<Transaction> arrayList = (ArrayList<Transaction>) map.get("transactions");
                 arrayList.add(transaction);
-                map.put("arrayListField", arrayList);
+                map.put("transactions", arrayList);
+                System.out.println("withdrawal" + map.get("bal").getClass());
                 Double balance = (Double) map.get("bal");
                 if (Double.parseDouble(amt) < balance) {
                     balance = balance - Double.parseDouble(amt);
@@ -373,17 +374,17 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                     HashMap<String, Object> infor = new HashMap<>();
                     infor.put("balance", balance);
 
-                    FirebaseFirestore.getInstance().collection("customers_accounts").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
+                    FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
                             Toast.makeText(IndividualTransactionActivity.this, "", Toast.LENGTH_LONG).show();
                         }
                     });
-                    int dt = (int) map.get("dt");
+                    long dt = (long) map.get("dt");
                     dt = dt + 1;
                     map.put("dt", dt);
                     map.put("lastTransaction", System.currentTimeMillis());
 
-                    AdminTransaction adminTransaction = new AdminTransaction(customerUID, "savings", amt, System.currentTimeMillis());
+                    AdminTransaction adminTransaction = new AdminTransaction(customerUID, "savings", amt, System.currentTimeMillis(), "Direct Withdrawal");
                     FirebaseFirestore.getInstance().collection("admin_transactions").add(adminTransaction).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
                             Toast.makeText(IndividualTransactionActivity.this, "", Toast.LENGTH_LONG).show();
@@ -428,7 +429,8 @@ public class IndividualTransactionActivity extends AppCompatActivity {
     }
 
     private void atm_withdraw_helper(String amt, String type) {
-        Transaction transaction = new Transaction(System.currentTimeMillis(), "withdrawal", amt);
+        Double a = Double.parseDouble(amt);
+        Transaction transaction = new Transaction(System.currentTimeMillis(), "withdrawal", a);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         DocumentReference docRef = db.collection("customers_account_spec").document(customerUID).collection("savings").document(accNum);
@@ -457,11 +459,11 @@ public class IndividualTransactionActivity extends AppCompatActivity {
 
                     FirebaseFirestore.getInstance().collection("customers_accounts").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
-                            Toast.makeText(IndividualTransactionActivity.this, "", Toast.LENGTH_LONG).show();
+                            Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show();
                         }
                     });
                     map.put("lastTransaction", System.currentTimeMillis());
-                    AdminTransaction adminTransaction = new AdminTransaction(customerUID, "current", amt, System.currentTimeMillis());
+                    AdminTransaction adminTransaction = new AdminTransaction(customerUID, "current", amt, System.currentTimeMillis(), "ATM Withdrawal");
                     FirebaseFirestore.getInstance().collection("admin_transactions").add(adminTransaction).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
                             Toast.makeText(IndividualTransactionActivity.this, "", Toast.LENGTH_LONG).show();

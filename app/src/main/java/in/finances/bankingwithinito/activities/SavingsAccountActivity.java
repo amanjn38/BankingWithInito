@@ -2,6 +2,7 @@ package in.finances.bankingwithinito.activities;
 
 import static in.finances.bankingwithinito.Utils.generateAccountNumber;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -38,7 +39,11 @@ public class SavingsAccountActivity extends AppCompatActivity {
         createAccount.setOnClickListener(view -> {
             if (accountType.equals("SavingsAccount")) {
                 if (checkFieldsForSavingsAccount()) {
+                    ProgressDialog progressDialog = new ProgressDialog(this);
+                    progressDialog.setTitle("Please wait...");
+                    progressDialog.setMessage("While we are creating your account...");
                     balance = ((EditText) findViewById(R.id.amount)).getText().toString();
+                    Double b = Double.parseDouble(balance);
                     HashMap<String, Object> infor = new HashMap<>();
                     double awiad = 0.0;
                     int ttatm = 0;
@@ -48,7 +53,7 @@ public class SavingsAccountActivity extends AppCompatActivity {
 
                     ArrayList<Transaction> transactions = new ArrayList<>();
 
-                    infor.put("bal", balance);
+                    infor.put("bal", b);
                     infor.put("awiad", awiad);
                     infor.put("ttatm", ttatm);
                     infor.put("dt", dt);
@@ -71,6 +76,7 @@ public class SavingsAccountActivity extends AppCompatActivity {
                     FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("savings").document(accNum).set(infor).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             Toast.makeText(SavingsAccountActivity.this, "Your acccount has been successfully created", Toast.LENGTH_LONG).show();
+                            progressDialog.dismiss();
                         }
                     });
 
@@ -87,7 +93,10 @@ public class SavingsAccountActivity extends AppCompatActivity {
                 }
             } else if (accountType.equals("CurrentAccount")) {
                 if (checkFieldsForCurrentAccount()) {
-                    balance = ((EditText) findViewById(R.id.name)).getText().toString();
+                    ProgressDialog progressDialog = new ProgressDialog(this);
+                    progressDialog.setTitle("Please wait...");
+                    progressDialog.setMessage("While we are creating your account...");
+                    balance = ((EditText) findViewById(R.id.amount)).getText().toString();
                     HashMap<String, Object> infor = new HashMap<>();
                     int tt = 0;
                     Long lastOpened = 0L;
@@ -103,8 +112,9 @@ public class SavingsAccountActivity extends AppCompatActivity {
                     Individual_Account individual_account = new Individual_Account(accNum, "current", balance);
                     SharedPreferences sharedPreferences = getSharedPreferences("customerUID", Context.MODE_PRIVATE);
                     String customerUID = sharedPreferences.getString("customerUID", "");
-                    FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("accounts").document("current").set(infor).addOnCompleteListener(task -> {
+                    FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("current").document(accNum).set(infor).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
+                            progressDialog.dismiss();
                         }
                     });
                     FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document(accNum).set(individual_account).addOnCompleteListener(task -> {

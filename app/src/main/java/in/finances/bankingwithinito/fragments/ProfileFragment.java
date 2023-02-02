@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
@@ -17,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import in.finances.bankingwithinito.R;
 import in.finances.bankingwithinito.activities.LoginActivity;
+import in.finances.bankingwithinito.activities.ProfileActivity;
 import in.finances.bankingwithinito.activities.ReferralActivity;
 
 /**
@@ -27,7 +29,7 @@ import in.finances.bankingwithinito.activities.ReferralActivity;
 public class ProfileFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
-
+    private TextView txtName;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -71,10 +73,18 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("customerUID", Context.MODE_PRIVATE);
+        String customerUID = sharedPreferences.getString("customerUID", "");
         // Inflate the layout for this fragment
         FirebaseAuth auth = FirebaseAuth.getInstance();
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
+        txtName = view.findViewById(R.id.txtName);
+
+        txtName.setOnClickListener(view1 -> {
+            txtName.setText(customerUID);
+        });
         view.findViewById(R.id.logout).setOnClickListener(e -> {
             auth.signOut();
             SharedPreferences pref = getActivity().getSharedPreferences("customerUID", MODE_PRIVATE);
@@ -92,6 +102,11 @@ public class ProfileFragment extends Fragment {
             startActivity(mainActivity);
         });
 
+        view.findViewById(R.id.personalInformation).setOnClickListener(v -> {
+            Intent mainActivity = new Intent(getContext(), ProfileActivity.class);
+            mainActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(mainActivity);
+        });
         return view;
     }
 

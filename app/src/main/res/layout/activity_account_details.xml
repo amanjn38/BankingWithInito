@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:backgroundTint="#ffffff"
             android:ems="10"
-            android:inputType="none" />
+            android:enabled="false" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
@@ -83,7 +83,7 @@
         android:gravity="center"
         android:text="Deposit"
         android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/downloadStatement"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

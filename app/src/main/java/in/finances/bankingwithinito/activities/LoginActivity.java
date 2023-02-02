@@ -31,6 +31,7 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressDialog progressDialog;
     private FirebaseAuth auth;
     private TextView signup;
+    private String login_type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,58 +43,78 @@ public class LoginActivity extends AppCompatActivity {
 
         signup = findViewById(R.id.sign_up);
 
+        login_type = getIntent().getStringExtra("login_type");
+
         cUID = findViewById(R.id.email);
         customerUID = cUID.getText().toString();
         fromRegisterActivity = getIntent().getBooleanExtra("fromRegisterActivity", false);
         if (fromRegisterActivity) {
             customerUIDRegister = getIntent().getStringExtra("customerUID");
         }
-        if (auth.getCurrentUser() == null) {
-            System.out.println("Working");
-            progressDialog.setTitle("Authenticating...");
-            progressDialog.setMessage("Please wait.. This may take a moment..");
-            findViewById(R.id.sign_up).setOnClickListener(e -> {
-                Intent login = new Intent(this, LoginActivity.class);
-                startActivityForResult(login, SIGNUP);
-            });
+        if (login_type.equals("customer")) {
+            if (auth.getCurrentUser() == null) {
+                System.out.println("Working");
+                progressDialog.setTitle("Authenticating...");
+                progressDialog.setMessage("Please wait.. This may take a moment..");
+                findViewById(R.id.sign_up).setOnClickListener(e -> {
+                    Intent login = new Intent(this, LoginActivity.class);
+                    startActivityForResult(login, SIGNUP);
+                });
 
-            findViewById(R.id.login).setOnClickListener(h -> {
-                if (checkFields()) {
-                    progressDialog.setTitle("Authenticating...");
-                    progressDialog.setMessage("Please wait.. This may take a moment..");
-                    progressDialog.setCancelable(false);
-                    progressDialog.show();
+                findViewById(R.id.login).setOnClickListener(h -> {
+                    if (checkFields()) {
+                        progressDialog.setTitle("Authenticating...");
+                        progressDialog.setMessage("Please wait.. This may take a moment..");
+                        progressDialog.setCancelable(false);
+                        progressDialog.show();
 
-                    customerUID = cUID.getText().toString();
-                    FirebaseFirestore.getInstance().collection("customers").document(customerUID).get().addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                System.out.println("testing" + "document exustys");
-                                // Retrieve data as a HashMap
-                                HashMap<String, Object> data = (HashMap<String, Object>) document.getData();
-                                String email = data.get("e").toString();
-                                login(email);
+                        customerUID = cUID.getText().toString();
+                        FirebaseFirestore.getInstance().collection("customers").document(customerUID).get().addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    // Retrieve data as a HashMap
+                                    HashMap<String, Object> data = (HashMap<String, Object>) document.getData();
+                                    String email = data.get("e").toString();
+                                    login(email);
 //                                    Log.d(TAG, "Data: " + data);
-                            } else {
+                                } else {
 //                                    Log.d(TAG, "No such document");
-                                Toast.makeText(LoginActivity.this, "Please enter correct username", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(LoginActivity.this, "Please enter correct username", Toast.LENGTH_LONG).show();
+                                    progressDialog.dismiss();
+                                }
                             }
-                        }
-                    });
+                        });
 
+                    } else {
+                        Snackbar.make(findViewById(R.id.email), errMsg, Snackbar.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                System.out.println("Working22");
+                ROOT_UID = auth.getUid();
+
+                Intent fragment = new Intent(this, MainActivity.class);
+                fragment.putExtra("customerUID", customerUIDRegister);
+                startActivity(fragment);
+                finish();
+            }
+        } else if (login_type.equals("admin")) {
+            if (checkFields()) {
+                progressDialog.setTitle("Authenticating...");
+                progressDialog.setMessage("Please wait.. This may take a moment..");
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+
+                customerUID = cUID.getText().toString();
+                if (cUID.equals("admin")) {
+                    admin_login("testing@inito.com");
                 } else {
-                    Snackbar.make(findViewById(R.id.email), errMsg, Snackbar.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Please enter correct credentials", Toast.LENGTH_LONG).show();
                 }
-            });
-        } else {
-            System.out.println("Working22");
-            ROOT_UID = auth.getUid();
 
-            Intent fragment = new Intent(this, MainActivity.class);
-            fragment.putExtra("customerUID", customerUIDRegister);
-            startActivity(fragment);
-            finish();
+            }
+
         }
 
         signup.setOnClickListener(view -> {
@@ -113,6 +134,32 @@ public class LoginActivity extends AppCompatActivity {
 
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         intent.putExtra("customerUID", customerUID);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+
+                    } else {
+                        Log.d("LOGIN", "signInWithCredential:failure" + task.getException());
+                        progressDialog.dismiss();
+                        Snackbar.make(findViewById(R.id.email), "Authentication Failed. Try again. Check your Internet Connection", Snackbar.LENGTH_SHORT).show();
+//                                    Intent fragment = new Intent(this, in.example.restaurant.Startup.SelectionActivity.class);
+//                                    startActivity(fragment);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    progressDialog.dismiss();
+                    Snackbar.make(findViewById(R.id.email), "Authentication Failed. Try again.", Snackbar.LENGTH_SHORT).show();
+                });
+
+    }
+
+    private void admin_login(String email) {
+        auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        ROOT_UID = auth.getUid();
+                        progressDialog.dismiss();
+
+                        Intent intent = new Intent(LoginActivity.this, AdminActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
 

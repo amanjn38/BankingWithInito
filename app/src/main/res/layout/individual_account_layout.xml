@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginTop="12dp"
-            android:text="DETE200"
+            android:text="Savings"
             android:textColor="@color/colorPrimary"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -30,10 +30,11 @@
             android:id="@+id/account_number"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="24dp"
-            android:text="Get discount"
+            android:layout_marginEnd="8dp"
+            android:text="Acc Num :"
+            app:layout_constraintEnd_toStartOf="@id/balance"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/account_type" />
 
@@ -41,11 +42,12 @@
             android:id="@+id/balance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="24dp"
-            android:text="Get discount"
+            android:layout_marginEnd="16dp"
+            android:text="Balance"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/account_number"
             app:layout_constraintTop_toBottomOf="@id/account_type" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

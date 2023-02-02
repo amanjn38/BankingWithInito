@@ -1,18 +1,28 @@
 package in.finances.bankingwithinito.fragments;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
 import in.finances.bankingwithinito.R;
+import in.finances.bankingwithinito.adapters.ATMAdapter;
 import in.finances.bankingwithinito.models.ATMCardDetails;
 
 /**
@@ -73,7 +83,34 @@ public class ATMCardDetailsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_a_t_m_card_details_activities, container, false);
+        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("customerUID", Context.MODE_PRIVATE);
+        String customerUID = sharedPreferences.getString("customerUID", "");
 
+        atmCardDetails = new ArrayList<>();
+        recyclerView = view.findViewById(R.id.recycler_view);
+        layoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(layoutManager);
+
+        System.out.println("testing accounts");
+        FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("savings").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (DocumentSnapshot documentSnapshot : task.getResult()) {
+                        String accNum = documentSnapshot.getString("accnum");
+                        String cardNumber = documentSnapshot.getString("cardNumber");
+                        String expiry = documentSnapshot.getString("expiry");
+                        String cvv = documentSnapshot.getString("cvv");
+
+                        ATMCardDetails atmCardDetail = new ATMCardDetails(accNum, cardNumber, cvv, expiry);
+                        atmCardDetails.add(atmCardDetail);
+                    }
+                }
+                ATMAdapter atmAdapter = new ATMAdapter(atmCardDetails, getContext());
+                recyclerView.setAdapter(atmAdapter);
+                atmAdapter.notifyDataSetChanged();
+            }
+        });
         return view;
     }
 

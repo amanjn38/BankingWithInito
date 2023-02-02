@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
-        android:text="Edit Profile"
+        android:text="Profile"
         android:textColor="#ffffff"
         android:textSize="32sp"
         android:textStyle="bold"
@@ -86,7 +86,7 @@
                     android:layout_height="wrap_content"
                     android:backgroundTint="#ffffff"
                     android:ems="10"
-                    android:inputType="textPersonName|textCapWords" />
+                    android:inputType="none" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -111,8 +111,6 @@
                     android:layout_height="wrap_content"
                     android:backgroundTint="#ffffff"
                     android:ems="10"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
                     android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -137,7 +135,7 @@
                     android:layout_height="wrap_content"
                     android:backgroundTint="#ffffff"
                     android:ems="10"
-                    android:inputType="number" />
+                    android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -150,7 +148,7 @@
                 android:layout_marginBottom="24dp"
                 android:background="@drawable/ic_button"
                 android:gravity="center"
-                android:text="Confirm"
+                android:text="Go Back"
                 android:textColor="#ffffff"
                 android:textSize="20sp"
                 app:layout_constraintBottom_toBottomOf="parent"

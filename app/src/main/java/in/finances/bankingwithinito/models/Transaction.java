@@ -5,9 +5,9 @@ import java.io.Serializable;
 public class Transaction implements Serializable {
     private Long Date;
     private String type;
-    private String amount;
+    private Double amount;
 
-    public Transaction(Long date, String type, String amount) {
+    public Transaction(Long date, String type, Double amount) {
         Date = date;
         this.type = type;
         this.amount = amount;
@@ -29,11 +29,11 @@ public class Transaction implements Serializable {
         this.type = type;
     }
 
-    public String getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
-    public void setAmount(String amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 }

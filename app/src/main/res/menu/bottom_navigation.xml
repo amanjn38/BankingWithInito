@@ -7,14 +7,9 @@
         android:title="Accounts List" />
 
     <item
-        android:id="@+id/navigation_about"
-        android:icon="@drawable/ic_baseline_label_24"
-        android:title="Orders History" />
-
-    <item
         android:id="@+id/navigation_atm"
         android:icon="@drawable/ic_baseline_atm_24"
-        android:title="Chat" />
+        android:title="ATM Card " />
 
     <item
         android:id="@+id/navigation_profile"

@@ -36,15 +36,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="#ffffff"
-            android:ems="10" />
+            android:ems="10"
+            android:inputType="number"
+            android:maxLength="16" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
-        android:id="@+id/referralCode"
+        android:id="@+id/referralCodetxt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="12345"
         android:textColor="@color/colorPrimary"
         android:textSize="48sp"
         android:textStyle="bold"

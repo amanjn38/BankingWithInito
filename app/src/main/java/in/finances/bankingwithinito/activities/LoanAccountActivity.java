@@ -78,11 +78,13 @@ public class LoanAccountActivity extends AppCompatActivity {
             emi.setText(String.valueOf(emii));
             generate_emi.setVisibility(View.GONE);
             createNewAccount.setVisibility(View.VISIBLE);
+            emi.setVisibility(View.VISIBLE);
             progressDialog.dismiss();
         });
 
         createNewAccount.setOnClickListener(view -> {
             if (checkFieldsForLoanAccount()) {
+                System.out.println("testing111" + check());
                 if (check()) {
                     String[] arr = check2();
                     String bal = arr[1];
@@ -120,8 +122,14 @@ public class LoanAccountActivity extends AppCompatActivity {
                                 startActivity(intent);
                             }
                         });
+                    } else {
+                        Toast.makeText(this, "You should have a savings or current in our bank to take a loan or the mazimum amount of loan we " +
+                                "can provide is 40% of the total deposits", Toast.LENGTH_LONG).show();
                     }
+                } else {
+                    Toast.makeText(this, "The minimum age to open a bank account is 25 yrs", Toast.LENGTH_LONG).show();
                 }
+            } else {
             }
 
         });
@@ -131,7 +139,7 @@ public class LoanAccountActivity extends AppCompatActivity {
     public static double calculateEMI(double p, double r, int t) {
         double emi;
 
-        System.out.println("testing" + p + " " + r + " " + t);
+//        System.out.println("testing" + p + " " + r + " " + t);
         r = r / (12 * 100); // one month interest
 
         emi = (p * r * (float) Math.pow(1 + r, t))
@@ -158,25 +166,27 @@ public class LoanAccountActivity extends AppCompatActivity {
 
     private boolean check() {
         final boolean[] isOldEnough = new boolean[1];
-        FirebaseFirestore.getInstance().collection("customers").document(customerUID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot documentSnapshot = task.getResult();
-                    long dob = (long) documentSnapshot.get("dob");
+        FirebaseFirestore.getInstance().collection("customers").document(customerUID).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot documentSnapshot = task.getResult();
+                long dob = (long) documentSnapshot.get("dob");
 
-                    Calendar birthDate = Calendar.getInstance();
-                    birthDate.setTimeInMillis(dob);
+                Calendar birthDate = Calendar.getInstance();
+                birthDate.setTimeInMillis(dob);
 
-                    Calendar today = Calendar.getInstance();
-                    int age = today.get(Calendar.YEAR) - birthDate.get(Calendar.YEAR);
+                Calendar today = Calendar.getInstance();
+                int age = today.get(Calendar.YEAR) - birthDate.get(Calendar.YEAR);
+                if (age >= 25) {
+                    System.out.println("testing12222" + isOldEnough[0]);
 
-                    if (age >= 25) {
-                        isOldEnough[0] = true;
-                    }
+                    isOldEnough[0] = true;
                 }
+                System.out.println("testing12" + isOldEnough[0]);
+
             }
         });
+        System.out.println("testing13" + isOldEnough[0]);
+
         return isOldEnough[0];
     }
 

@@ -132,7 +132,7 @@ public class AccountDetailsActivity extends AppCompatActivity {
                                 table.addCell(String.valueOf(x));
                                 ++x;
                                 table.addCell(transaction.getType());
-                                table.addCell(transaction.getAmount());
+                                table.addCell(String.valueOf(transaction.getAmount()));
                                 Long date1 = transaction.getDate();
                                 Date date = new Date(date1);
                                 table.addCell(date.toString());

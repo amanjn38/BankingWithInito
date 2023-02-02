@@ -35,11 +35,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="#ffffff"
-            android:ems="10" />
+            android:ems="10"
+            android:inputType="number" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:visibility="gone"
         android:id="@+id/holderCardNumber"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
@@ -47,6 +47,7 @@
         android:layout_margin="24dp"
         android:hint="Card Number :"
         android:textColorHint="@color/colorPrimaryDark"
+        android:visibility="gone"
         app:counterEnabled="true"
         app:counterMaxLength="16"
         app:layout_constraintEnd_toEndOf="parent"
@@ -65,11 +66,11 @@
 
     <LinearLayout
         android:id="@+id/ll"
-        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:baselineAligned="false"
         android:orientation="horizontal"
+        android:visibility="gone"
         android:weightSum="2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

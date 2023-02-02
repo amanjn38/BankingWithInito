@@ -9,6 +9,9 @@ public class ATMCardDetails implements Serializable {
     private String cvv;
     private String expiry_date;
 
+    public ATMCardDetails(){
+
+    }
     public ATMCardDetails(String acc_num, String card_number, String cvv, String expiry_date) {
         this.acc_num = acc_num;
         this.card_number = card_number;

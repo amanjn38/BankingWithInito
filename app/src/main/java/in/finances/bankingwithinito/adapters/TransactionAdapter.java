@@ -9,6 +9,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.ArrayList;
 
 import in.finances.bankingwithinito.R;
@@ -32,7 +35,18 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        AdminTransaction adminTransaction = arrayList.get(position);
+        holder.description.setText(adminTransaction.getTransaction_type());
 
+        FirebaseFirestore.getInstance().collection("customers").document(adminTransaction.getCustomerUID()).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot d = task.getResult();
+                if (d.contains("n")) {
+                    String n = d.getString("n");
+                    holder.customer_name.setText(n);
+                }
+            }
+        });
     }
 
     @Override

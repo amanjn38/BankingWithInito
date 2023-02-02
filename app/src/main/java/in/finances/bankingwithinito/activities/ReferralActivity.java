@@ -18,7 +18,7 @@ import in.finances.bankingwithinito.R;
 
 public class ReferralActivity extends AppCompatActivity {
 
-    private TextView generateReferralCode, referralCode;
+    private TextView generateReferralCode, referralCodetxt;
     private EditText accNum;
 
     private static final HashMap<Character, Integer> letterValues = new HashMap<Character, Integer>() {{
@@ -50,14 +50,15 @@ public class ReferralActivity extends AppCompatActivity {
         put('Z', 67108863);
     }};
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_referral);
 
         generateReferralCode = findViewById(R.id.generateReferralCode);
-        referralCode = findViewById(R.id.referralCode);
         accNum = findViewById(R.id.accNum);
+        referralCodetxt = findViewById(R.id.referralCodetxt);
         generateReferralCode.setOnClickListener(view -> {
             String acc = accNum.getText().toString();
             if (acc.length() != 16) {
@@ -71,24 +72,20 @@ public class ReferralActivity extends AppCompatActivity {
                         if (document.contains("n")) {
                             String name = document.getString("n");
                             String[] arr = name.split(" ");
-                            int ref = computeReferralCode(arr[0]);
-                            referralCode.setText(ref);
+                            computeReferralCode(arr[0]);
                         }
                     }
                 });
             }
         });
-
     }
 
-    public static int computeReferralCode(String name) {
+    public void computeReferralCode(String name) {
         name = name.toUpperCase();
         int referralCode = 0;
         for (int i = 0; i < name.length(); i++) {
             referralCode += letterValues.get(name.charAt(i));
         }
-        return referralCode;
+        referralCodetxt.setText(referralCode);
     }
-
-
 }
