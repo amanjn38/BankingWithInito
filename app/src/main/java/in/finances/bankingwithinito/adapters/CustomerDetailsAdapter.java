@@ -33,11 +33,11 @@ public class CustomerDetailsAdapter extends RecyclerView.Adapter<CustomerDetails
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         CustomerDetails customerDetails1 = customerDetails.get(position);
-        holder.customerUID.setText(customerDetails1.getUid());
-        holder.detailAddress.setText(customerDetails1.getAdd());
-        holder.detailEmail.setText(customerDetails1.getE());
-        holder.detailName.setText(customerDetails1.getN());
-        holder.detailPhone.setText(customerDetails1.getPh());
+        holder.customerUID.setText("Unique ID : " + customerDetails1.getUn());
+        holder.detailAddress.setText("Address : " + customerDetails1.getAdd());
+        holder.detailEmail.setText("Email : " + customerDetails1.getE());
+        holder.detailName.setText("Name : " + customerDetails1.getN());
+        holder.detailPhone.setText("Phone : " +customerDetails1.getPh());
     }
 
     @Override
@@ -51,11 +51,11 @@ public class CustomerDetailsAdapter extends RecyclerView.Adapter<CustomerDetails
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            customerUID = itemView.findViewById(R.id.account_number_text_view);
-            detailAddress = itemView.findViewById(R.id.atmCardNumber);
-            detailEmail = itemView.findViewById(R.id.cvvNumber);
-            detailName = itemView.findViewById(R.id.expiryDate);
-            detailAddress = itemView.findViewById(R.id.atm_card_card_view);
+            customerUID = itemView.findViewById(R.id.customerUID);
+            detailAddress = itemView.findViewById(R.id.detailAddress);
+            detailEmail = itemView.findViewById(R.id.detailEmail);
+            detailName = itemView.findViewById(R.id.detailName);
+            detailPhone = itemView.findViewById(R.id.detailPhone);
         }
     }
 }

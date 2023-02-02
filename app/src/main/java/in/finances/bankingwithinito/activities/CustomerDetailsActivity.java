@@ -6,10 +6,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import in.finances.bankingwithinito.R;
 import in.finances.bankingwithinito.adapters.CustomerDetailsAdapter;
@@ -35,8 +35,21 @@ public class CustomerDetailsActivity extends AppCompatActivity {
         FirebaseFirestore.getInstance().collection("customers").get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        List<CustomerDetails> snapshotCoupons = task.getResult().toObjects(CustomerDetails.class);
-                        customerDetails.addAll(snapshotCoupons);
+//                        List<CustomerDetails> snapshotCoupons = task.getResult().toObjects(CustomerDetails.class);
+//                        customerDetails.addAll(snapshotCoupons);
+                        for (DocumentSnapshot documentSnapshot : task.getResult()) {
+                            String add = documentSnapshot.getString("add");
+                            String n = documentSnapshot.getString("n");
+                            String e = documentSnapshot.getString("e");
+                            String ph = documentSnapshot.getString("ph");
+                            String un = documentSnapshot.getString("un");
+                            String uid = documentSnapshot.getString("uid");
+                            double lt = documentSnapshot.getDouble("lt");
+                            double lo = documentSnapshot.getDouble("lo");
+                            long dob = documentSnapshot.getLong("dob");
+                            CustomerDetails customerDetails1 = new CustomerDetails(n, add, e, ph, un, uid, lt, lo, dob);
+                            customerDetails.add(customerDetails1);
+                        }
                     }
 //                    Log.d("couponfrag1", coupons.toString());
                     CustomerDetailsAdapter customerDetailsAdapter = new CustomerDetailsAdapter(customerDetails, getApplicationContext());

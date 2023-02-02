@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -59,9 +60,12 @@ public class AccountDetailsActivity extends AppCompatActivity {
                 break;
             case "loan":
                 accountType.setText("Loan Acccount");
+                withdraw.setVisibility(View.GONE);
+                withdrawWithATM.setVisibility(View.GONE);
                 break;
             case "current":
                 accountType.setText("Current Acccount");
+                withdrawWithATM.setVisibility(View.GONE);
                 break;
         }
         amount.setText(balance);

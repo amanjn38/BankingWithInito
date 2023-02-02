@@ -18,19 +18,19 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.Transaction;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Objects;
 
 import in.finances.bankingwithinito.R;
 import in.finances.bankingwithinito.models.Individual_Account;
-import in.finances.bankingwithinito.models.Transaction;
 
 public class LoanAccountActivity extends AppCompatActivity {
 
@@ -54,84 +54,203 @@ public class LoanAccountActivity extends AppCompatActivity {
         time = findViewById(R.id.time);
         createNewAccount = findViewById(R.id.createNewAccount);
         emi = findViewById(R.id.emi);
-        SharedPreferences sharedPreferences = getSharedPreferences("customerUID", Context.MODE_PRIVATE);
-        customerUID = sharedPreferences.getString("customerUID", "");
         generate_emi.setOnClickListener(view -> {
-            if (spinner.getSelectedItem().toString().equals("Home Loan ( Interest 7% )")) {
-                interest_rate = 7.0;
-            } else if (spinner.getSelectedItem().toString().equals("Car Loan ( Interest 8% )")) {
-                interest_rate = 8.0;
-            } else if (spinner.getSelectedItem().toString().equals("Personal Loan ( Interest 12% )")) {
-                interest_rate = 12.0;
-            } else if (spinner.getSelectedItem().toString().equals("Business Loan ( Interest 15% )")) {
-                interest_rate = 15.0;
+            if (checkFieldsForLoanAccount()) {
+                if (spinner.getSelectedItem().toString().equals("Home Loan ( Interest 7% )")) {
+                    interest_rate = 7.0;
+                } else if (spinner.getSelectedItem().toString().equals("Car Loan ( Interest 8% )")) {
+                    interest_rate = 8.0;
+                } else if (spinner.getSelectedItem().toString().equals("Personal Loan ( Interest 12% )")) {
+                    interest_rate = 12.0;
+                } else if (spinner.getSelectedItem().toString().equals("Business Loan ( Interest 15% )")) {
+                    interest_rate = 15.0;
+                }
+
+                numMonths = Integer.parseInt(time.getSelectedItem().toString());
+                numMonths = numMonths * 12;
+
+                progressDialog.setTitle("Please wait..");
+                progressDialog.setMessage("We are calculating the emi..");
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+                double emii = calculateEMI(Double.parseDouble(balance), interest_rate, numMonths);
+                emi.setText(String.valueOf(emii));
+                generate_emi.setVisibility(View.GONE);
+                createNewAccount.setVisibility(View.VISIBLE);
+                emi.setVisibility(View.VISIBLE);
+                progressDialog.dismiss();
             }
 
-            numMonths = Integer.parseInt(time.getSelectedItem().toString());
-            numMonths = numMonths * 12;
-
-            progressDialog.setTitle("Please wait..");
-            progressDialog.setMessage("We are calculating the emi..");
-            progressDialog.setCancelable(false);
-            progressDialog.show();
-            double emii = calculateEMI(Double.parseDouble(amount.getText().toString()), interest_rate, numMonths);
-            emi.setText(String.valueOf(emii));
-            generate_emi.setVisibility(View.GONE);
-            createNewAccount.setVisibility(View.VISIBLE);
-            emi.setVisibility(View.VISIBLE);
-            progressDialog.dismiss();
         });
 
         createNewAccount.setOnClickListener(view -> {
             if (checkFieldsForLoanAccount()) {
-                System.out.println("testing111" + check());
-                if (check()) {
-                    String[] arr = check2();
-                    String bal = arr[1];
-                    balance = amount.getText().toString();
-                    if (Double.parseDouble(balance) <= 0.4 * Double.parseDouble(bal) && Objects.equals(arr[0], "true")) {
-                        progressDialog.setTitle("Please wait..");
-                        progressDialog.setMessage("We are creating your account..");
-                        progressDialog.setCancelable(false);
-                        progressDialog.show();
+                SharedPreferences sharedPreferences = getSharedPreferences("customerUID", Context.MODE_PRIVATE);
+                customerUID = sharedPreferences.getString("customerUID", "");
+                FirebaseFirestore.getInstance().collection("customers").document(customerUID).get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot documentSnapshot = task.getResult();
+                        long dob = (long) documentSnapshot.get("dob");
 
-                        HashMap<String, Object> infor = new HashMap<>();
-                        infor.put("emi", calculateEMI(Double.parseDouble(balance), interest_rate, numMonths));
-                        infor.put("time_period", numMonths / 12);
-                        infor.put("interest_rate", interest_rate);
-                        ArrayList<Transaction> transactions = new ArrayList<>();
-                        infor.put("transactions", transactions);
-                        String accNum = String.valueOf(generateAccountNumber());
-                        infor.put("accNum", accNum);
-                        infor.put("amount", amount);
-                        infor.put("lastInterestCalculationDate", new java.util.Date());
-                        Individual_Account individual_account = new Individual_Account(accNum, "loan", balance);
+                        Calendar birthDate = Calendar.getInstance();
+                        birthDate.setTimeInMillis(dob);
 
-                        FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("loan").document(accNum).set(infor).addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                Toast.makeText(LoanAccountActivity.this, "Your acccount has been successfully created", Toast.LENGTH_LONG).show();
-                            }
-                        });
+                        Calendar today = Calendar.getInstance();
+                        int age = today.get(Calendar.YEAR) - birthDate.get(Calendar.YEAR);
+                        if (age >= 25) {
+                            FirebaseFirestore db = FirebaseFirestore.getInstance();
+                            CollectionReference accountsRef = db.collection("customers_account_spec").document(customerUID).collection("savings");
+                            accountsRef.get().addOnSuccessListener(querySnapshot -> {
+                                if (querySnapshot.isEmpty()) {
+                                    // check if the customer has a current account
+                                    CollectionReference accountsRef1 = db.collection("customers_account_spec").document(customerUID).collection("current");
+                                    accountsRef1.get().addOnSuccessListener(querySnapshot1 -> {
+                                        if (querySnapshot1.isEmpty()) {
+                                            Toast.makeText(LoanAccountActivity.this, "You should have a savings or current account to be eligible for loan", Toast.LENGTH_LONG).show();
+                                        } else {
+                                            FirebaseFirestore db1 = FirebaseFirestore.getInstance();
+                                            CollectionReference accountsRef11 = db1.collection("customers_account_spec").document(customerUID).collection("savings");
+                                            accountsRef11.get().addOnSuccessListener(querySnapshot11 -> {
+                                                final int[] totalDeposit = {0};
+                                                for (QueryDocumentSnapshot document : querySnapshot11) {
+                                                    int balance = document.getDouble("bal").intValue();
+                                                    totalDeposit[0] += balance;
+                                                }
+                                                // check if the customer has a current account
+                                                CollectionReference accountsRef111 = db1.collection("customers_account_spec").document(customerUID).collection("current");
+                                                accountsRef111.get().addOnSuccessListener(querySnapshot111 -> {
+                                                    for (QueryDocumentSnapshot document : querySnapshot111) {
+                                                        int balance = document.getDouble("bal").intValue();
+                                                        totalDeposit[0] += balance;
+                                                    }
+                                                    double b = Double.parseDouble(balance);
+                                                    if (b <= totalDeposit[0] * 40 / 100) {
+                                                        progressDialog.setTitle("Please wait..");
+                                                        progressDialog.setMessage("We are creating your account..");
+                                                        progressDialog.setCancelable(false);
+                                                        progressDialog.show();
 
-                        FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document(accNum).set(individual_account).addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                Toast.makeText(LoanAccountActivity.this, "Your acccount has been successfully created", Toast.LENGTH_LONG).show();
-                                Intent intent = new Intent(LoanAccountActivity.this, MainActivity.class);
-                                intent.putExtra("customerUID", customerUID);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                            }
-                        });
-                    } else {
-                        Toast.makeText(this, "You should have a savings or current in our bank to take a loan or the mazimum amount of loan we " +
-                                "can provide is 40% of the total deposits", Toast.LENGTH_LONG).show();
+                                                        HashMap<String, Object> infor = new HashMap<>();
+                                                        double emii = calculateEMI(Double.parseDouble(balance), interest_rate, numMonths);
+                                                        infor.put("emi", emii);
+                                                        infor.put("time_period", numMonths / 12);
+                                                        infor.put("interest_rate", interest_rate);
+                                                        ArrayList<Transaction> transactions = new ArrayList<>();
+                                                        infor.put("transactions", transactions);
+                                                        String accNum = String.valueOf(generateAccountNumber());
+                                                        infor.put("accNum", accNum);
+                                                        infor.put("amount", amount);
+                                                        infor.put("lastInterestCalculationDate", new java.util.Date());
+                                                        infor.put("lastTransaction", System.currentTimeMillis());
+                                                        Individual_Account individual_account = new Individual_Account(accNum, "loan", balance);
+
+                                                        FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("loan").document(accNum).set(infor).addOnCompleteListener(task12 -> {
+                                                            if (task12.isSuccessful()) {
+                                                                Toast.makeText(LoanAccountActivity.this, "Your acccount has been successfully created", Toast.LENGTH_LONG).show();
+                                                            }
+                                                        });
+
+                                                        FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document(accNum).set(individual_account).addOnCompleteListener(task13 -> {
+                                                            if (task13.isSuccessful()) {
+                                                                Toast.makeText(LoanAccountActivity.this, "Your acccount has been successfully created", Toast.LENGTH_LONG).show();
+                                                                progressDialog.dismiss();
+                                                                Intent intent = new Intent(LoanAccountActivity.this, MainActivity.class);
+                                                                intent.putExtra("customerUID", customerUID);
+                                                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                                startActivity(intent);
+                                                            }
+                                                        });
+
+                                                    } else {
+                                                        Toast.makeText(LoanAccountActivity.this, "The loan amount cannot be greater than 40% of the total deposits", Toast.LENGTH_LONG).show();
+                                                    }
+                                                });
+                                            });
+
+                                        }
+                                    });
+                                } else {
+                                    FirebaseFirestore db1 = FirebaseFirestore.getInstance();
+                                    CollectionReference accountsRef1 = db1.collection("customers_account_spec").document(customerUID).collection("savings");
+                                    accountsRef1.get().addOnSuccessListener(querySnapshot12 -> {
+                                        final int[] totalDeposit = {0};
+                                        for (QueryDocumentSnapshot document : querySnapshot12) {
+                                            int balance = document.getDouble("bal").intValue();
+                                            totalDeposit[0] += balance;
+                                            System.out.println("totalDEPOSIT1" + totalDeposit[0]);
+
+                                        }
+                                        // check if the customer has a current account
+                                        CollectionReference accountsRef112 = db1.collection("customers_account_spec").document(customerUID).collection("current");
+                                        accountsRef112.get().addOnSuccessListener(querySnapshot121 -> {
+                                            for (QueryDocumentSnapshot document : querySnapshot121) {
+                                                int balance = document.getDouble("bal").intValue();
+                                                totalDeposit[0] += balance;
+                                                System.out.println("totalDEPOSIT2" + totalDeposit[0]);
+
+                                            }
+                                            double b = Double.parseDouble(balance);
+                                            System.out.println("totalDEPOSIT" + totalDeposit[0]);
+                                            if (b <= totalDeposit[0] * 40 / 100) {
+                                                progressDialog.setTitle("Please wait..");
+                                                progressDialog.setMessage("We are creating your account..");
+                                                progressDialog.setCancelable(false);
+                                                progressDialog.show();
+
+                                                HashMap<String, Object> infor = new HashMap<>();
+                                                double emii = calculateEMI(Double.parseDouble(balance), interest_rate, numMonths);
+                                                infor.put("emi", emii);
+                                                infor.put("time_period", numMonths / 12);
+                                                infor.put("interest_rate", interest_rate);
+                                                ArrayList<Transaction> transactions = new ArrayList<>();
+                                                infor.put("transactions", transactions);
+                                                String accNum = String.valueOf(generateAccountNumber());
+                                                infor.put("accNum", accNum);
+                                                infor.put("amount", amount);
+                                                infor.put("lastInterestCalculationDate", new java.util.Date());
+                                                infor.put("lastTransaction", System.currentTimeMillis());
+                                                Individual_Account individual_account = new Individual_Account(accNum, "loan", balance);
+
+                                                FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("loan").document(accNum).set(infor).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task14) {
+                                                        if (task14.isSuccessful()) {
+                                                            Toast.makeText(LoanAccountActivity.this, "Your account has been successfully created", Toast.LENGTH_LONG).show();
+                                                        }
+                                                    }
+                                                });
+
+                                                FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document(accNum).set(individual_account).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task15) {
+                                                        if (task15.isSuccessful()) {
+                                                            Toast.makeText(LoanAccountActivity.this, "Your account has been successfully created", Toast.LENGTH_LONG).show();
+                                                            progressDialog.dismiss();
+                                                            Intent intent = new Intent(LoanAccountActivity.this, MainActivity.class);
+                                                            intent.putExtra("customerUID", customerUID);
+                                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                            startActivity(intent);
+                                                        }
+                                                    }
+                                                });
+                                            } else {
+                                                Toast.makeText(LoanAccountActivity.this, "The loan amount cannot be greater than 40% of the total deposits", Toast.LENGTH_LONG).show();
+                                            }
+                                        });
+                                    });
+
+                                }
+                            });
+
+                        } else {
+                            Toast.makeText(this, "The minimum age required to open a loan account is 25 years", Toast.LENGTH_LONG).show();
+                        }
+
+
                     }
-                } else {
-                    Toast.makeText(this, "The minimum age to open a bank account is 25 yrs", Toast.LENGTH_LONG).show();
-                }
-            } else {
-            }
+                });
 
+            }
         });
         progressDialog.dismiss();
     }
@@ -156,7 +275,7 @@ public class LoanAccountActivity extends AppCompatActivity {
             Toast.makeText(LoanAccountActivity.this, error_msg, Toast.LENGTH_LONG).show();
             return false;
         } else if (Integer.parseInt(balance) < 500000) {
-            error_msg = "Minimum amount to open a savings account is Rs. 500000";
+            error_msg = "Minimum amount to open a loan account is Rs. 500000";
             Toast.makeText(LoanAccountActivity.this, error_msg, Toast.LENGTH_LONG).show();
             return false;
         }
@@ -166,55 +285,9 @@ public class LoanAccountActivity extends AppCompatActivity {
 
     private boolean check() {
         final boolean[] isOldEnough = new boolean[1];
-        FirebaseFirestore.getInstance().collection("customers").document(customerUID).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot documentSnapshot = task.getResult();
-                long dob = (long) documentSnapshot.get("dob");
-
-                Calendar birthDate = Calendar.getInstance();
-                birthDate.setTimeInMillis(dob);
-
-                Calendar today = Calendar.getInstance();
-                int age = today.get(Calendar.YEAR) - birthDate.get(Calendar.YEAR);
-                if (age >= 25) {
-                    System.out.println("testing12222" + isOldEnough[0]);
-
-                    isOldEnough[0] = true;
-                }
-                System.out.println("testing12" + isOldEnough[0]);
-
-            }
-        });
         System.out.println("testing13" + isOldEnough[0]);
 
         return isOldEnough[0];
     }
 
-    private String[] check2() {
-        final String[] hasAccount = new String[2];
-        hasAccount[0] = "false";
-
-        FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("accounts").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-
-                    for (DocumentSnapshot documentSnapshot : task.getResult()) {
-                        if (documentSnapshot.getId().equals("savings") || documentSnapshot.getId().equals("current")) {
-                            hasAccount[0] = "true";
-                        }
-                        if (documentSnapshot.contains("bal")) {
-                            double bal = Double.parseDouble(documentSnapshot.getString("bal"));
-                            double bal2 = Double.parseDouble(hasAccount[1]);
-                            double total = bal + bal2;
-                            hasAccount[1] = String.valueOf(total);
-                        }
-                    }
-
-                }
-            }
-        });
-        return hasAccount;
-
-    }
 }

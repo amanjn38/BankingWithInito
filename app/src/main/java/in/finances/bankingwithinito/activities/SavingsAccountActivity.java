@@ -13,9 +13,11 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 
 import in.finances.bankingwithinito.R;
@@ -93,42 +95,61 @@ public class SavingsAccountActivity extends AppCompatActivity {
                 }
             } else if (accountType.equals("CurrentAccount")) {
                 if (checkFieldsForCurrentAccount()) {
-                    ProgressDialog progressDialog = new ProgressDialog(this);
-                    progressDialog.setTitle("Please wait...");
-                    progressDialog.setMessage("While we are creating your account...");
-                    balance = ((EditText) findViewById(R.id.amount)).getText().toString();
-                    HashMap<String, Object> infor = new HashMap<>();
-                    int tt = 0;
-                    Long lastOpened = 0L;
-                    ArrayList<Transaction> transactions = new ArrayList<>();
-
-                    infor.put("bal", balance);
-                    infor.put("tt", tt); //total transactions in a month
-                    infor.put("lastopened", lastOpened);
-                    infor.put("transactions", transactions);
-                    String accNum = String.valueOf(generateAccountNumber());
-
-                    infor.put("accnum", accNum);
-                    Individual_Account individual_account = new Individual_Account(accNum, "current", balance);
                     SharedPreferences sharedPreferences = getSharedPreferences("customerUID", Context.MODE_PRIVATE);
                     String customerUID = sharedPreferences.getString("customerUID", "");
-                    FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("current").document(accNum).set(infor).addOnCompleteListener(task -> {
+                    FirebaseFirestore.getInstance().collection("customers").document(customerUID).get().addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            progressDialog.dismiss();
+                            DocumentSnapshot documentSnapshot = task.getResult();
+                            long dob = (long) documentSnapshot.get("dob");
+
+                            Calendar birthDate = Calendar.getInstance();
+                            birthDate.setTimeInMillis(dob);
+
+                            Calendar today = Calendar.getInstance();
+                            int age = today.get(Calendar.YEAR) - birthDate.get(Calendar.YEAR);
+                            if (age >= 18) {
+                                ProgressDialog progressDialog = new ProgressDialog(this);
+                                progressDialog.setTitle("Please wait...");
+                                progressDialog.setMessage("While we are creating your account...");
+                                balance = ((EditText) findViewById(R.id.amount)).getText().toString();
+                                HashMap<String, Object> infor = new HashMap<>();
+                                int tt = 0;
+                                Long lastOpened = 0L;
+                                ArrayList<Transaction> transactions = new ArrayList<>();
+
+                                infor.put("bal", balance);
+                                infor.put("tt", tt); //total transactions in a month
+                                infor.put("lastopened", lastOpened);
+                                infor.put("transactions", transactions);
+                                String accNum = String.valueOf(generateAccountNumber());
+
+                                infor.put("accnum", accNum);
+                                Individual_Account individual_account = new Individual_Account(accNum, "current", balance);
+                                FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("current").document(accNum).set(infor).addOnCompleteListener(task11 -> {
+                                    if (task11.isSuccessful()) {
+                                        progressDialog.dismiss();
+                                    }
+                                });
+                                FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document(accNum).set(individual_account).addOnCompleteListener(task22 -> {
+                                    if (task22.isSuccessful()) {
+                                        Toast.makeText(SavingsAccountActivity.this, "Your acccount has been successfully created", Toast.LENGTH_LONG).show();
+                                        Intent intent = new Intent(SavingsAccountActivity.this, MainActivity.class);
+                                        intent.putExtra("customerUID", customerUID);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                        startActivity(intent);
+                                    }
+                                });
+                            } else {
+                                Toast.makeText(this, "The minimum age required to open a loan account is 18 years", Toast.LENGTH_LONG).show();
+                            }
                         }
                     });
-                    FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document(accNum).set(individual_account).addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(SavingsAccountActivity.this, "Your acccount has been successfully created", Toast.LENGTH_LONG).show();
-                            Intent intent = new Intent(SavingsAccountActivity.this, MainActivity.class);
-                            intent.putExtra("customerUID", customerUID);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(intent);
-                        }
-                    });
+
                 }
             }
         });
+
+
     }
 
     private boolean checkFieldsForSavingsAccount() {

@@ -86,6 +86,6 @@ public class ReferralActivity extends AppCompatActivity {
         for (int i = 0; i < name.length(); i++) {
             referralCode += letterValues.get(name.charAt(i));
         }
-        referralCodetxt.setText(referralCode);
+        referralCodetxt.setText(String.valueOf(referralCode));
     }
 }

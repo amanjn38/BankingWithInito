@@ -92,25 +92,28 @@ public class ATMCardDetailsFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
 
         System.out.println("testing accounts");
-        FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("savings").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    for (DocumentSnapshot documentSnapshot : task.getResult()) {
-                        String accNum = documentSnapshot.getString("accnum");
-                        String cardNumber = documentSnapshot.getString("cardNumber");
-                        String expiry = documentSnapshot.getString("expiry");
-                        String cvv = documentSnapshot.getString("cvv");
+        if (customerUID != null) {
+            FirebaseFirestore.getInstance().collection("customers_account_spec").document(customerUID).collection("savings").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot documentSnapshot : task.getResult()) {
+                            String accNum = documentSnapshot.getString("accnum");
+                            String cardNumber = documentSnapshot.getString("cardNumber");
+                            String expiry = documentSnapshot.getString("expiry");
+                            String cvv = documentSnapshot.getString("cvv");
 
-                        ATMCardDetails atmCardDetail = new ATMCardDetails(accNum, cardNumber, cvv, expiry);
-                        atmCardDetails.add(atmCardDetail);
+                            ATMCardDetails atmCardDetail = new ATMCardDetails(accNum, cardNumber, cvv, expiry);
+                            atmCardDetails.add(atmCardDetail);
+                        }
                     }
+                    ATMAdapter atmAdapter = new ATMAdapter(atmCardDetails, getContext());
+                    recyclerView.setAdapter(atmAdapter);
+                    atmAdapter.notifyDataSetChanged();
                 }
-                ATMAdapter atmAdapter = new ATMAdapter(atmCardDetails, getContext());
-                recyclerView.setAdapter(atmAdapter);
-                atmAdapter.notifyDataSetChanged();
-            }
-        });
+            });
+
+        }
         return view;
     }
 

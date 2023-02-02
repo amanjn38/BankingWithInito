@@ -1,6 +1,7 @@
 package in.finances.bankingwithinito.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
@@ -122,7 +123,7 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                 Transaction transaction = new Transaction(System.currentTimeMillis(), "deposit", a);
 
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
-                DocumentReference docRef = db.collection("customers").document(customerUID).collection("savings").document(accNum);
+                DocumentReference docRef = db.collection("customers_account_spec").document(customerUID).collection("savings").document(accNum);
                 docRef.get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
@@ -135,10 +136,18 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                         map.put("bal", balance);
                         HashMap<String, Object> infor = new HashMap<>();
                         infor.put("balance", balance);
-
-                        FirebaseFirestore.getInstance().collection("customers_accounts").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
+                        AdminTransaction adminTransaction = new AdminTransaction(customerUID, "savings", amt, System.currentTimeMillis(), "Deposit");
+                        FirebaseFirestore.getInstance().collection("admin_transactions").add(adminTransaction).addOnCompleteListener(task1 -> {
                             if (task1.isSuccessful()) {
                                 Toast.makeText(IndividualTransactionActivity.this, "", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        FirebaseFirestore.getInstance().collection("customers_accounts").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
+                            if (task1.isSuccessful()) {
+                                Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show();
+                                Intent intent = new Intent(IndividualTransactionActivity.this, MainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
                             }
                         });
                         docRef.update(map).addOnSuccessListener(aVoid -> Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show());
@@ -152,26 +161,50 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                 Double a = Double.parseDouble(amt);
                 Transaction transaction = new Transaction(System.currentTimeMillis(), "deposit", a);
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
-                DocumentReference docRef = db.collection("customers").document(customerUID).collection("current").document(accNum);
+                DocumentReference docRef = db.collection("customers_account_spec").document(customerUID).collection("current").document(accNum);
                 docRef.get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        Map<String, Object> map = document.getData();
-                        ArrayList<Transaction> arrayList = (ArrayList<Transaction>) map.get("transactions");
-                        arrayList.add(transaction);
-                        map.put("transactions", arrayList);
-                        double balance = (double) map.get("bal");
-                        balance = balance + Double.parseDouble(amt);
-                        map.put("bal", balance);
-                        HashMap<String, Object> infor = new HashMap<>();
-                        infor.put("balance", balance);
 
-                        FirebaseFirestore.getInstance().collection("customers_accounts").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
-                            if (task1.isSuccessful()) {
-                                Toast.makeText(IndividualTransactionActivity.this, "", Toast.LENGTH_LONG).show();
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            System.out.println("mapvalue" + document);
+                            Map<String, Object> map = new HashMap<>();
+                            System.out.println("mapvalue" + map);
+                            ArrayList<Transaction> arrayList = (ArrayList<Transaction>) document.get("transactions");
+                            if (arrayList == null) {
+                                ArrayList<Transaction> arrayList1 = new ArrayList<>();
+                                arrayList1.add(transaction);
+                                map.put("transactions", arrayList1);
+                            } else {
+                                arrayList.add(transaction);
+                                map.put("transactions", arrayList);
                             }
-                        });
-                        docRef.update(map).addOnSuccessListener(aVoid -> Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show());
+                            String balance = document.getString("bal");
+                            double d = Double.parseDouble(balance);
+                            d = d + Double.parseDouble(amt);
+                            map.put("bal", d);
+                            HashMap<String, Object> infor = new HashMap<>();
+                            infor.put("balance", d);
+
+                            AdminTransaction adminTransaction = new AdminTransaction(customerUID, "current", amt, System.currentTimeMillis(), "Deposit");
+                            FirebaseFirestore.getInstance().collection("admin_transactions").add(adminTransaction).addOnCompleteListener(task1 -> {
+                                if (task1.isSuccessful()) {
+                                    Toast.makeText(IndividualTransactionActivity.this, "", Toast.LENGTH_LONG).show();
+                                }
+                            });
+                            FirebaseFirestore.getInstance().collection("customers_accounts").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
+                                if (task1.isSuccessful()) {
+                                    Toast.makeText(IndividualTransactionActivity.this, "", Toast.LENGTH_LONG).show();
+                                    Intent intent = new Intent(IndividualTransactionActivity.this, MainActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    startActivity(intent);
+                                }
+                            });
+                            docRef.update(map).addOnSuccessListener(aVoid -> Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show());
+                        } else {
+                            Toast.makeText(this, "Document does not exist", Toast.LENGTH_LONG).show();
+
+                        }
                     } else {
                         Toast.makeText(this, "Error getting details", Toast.LENGTH_LONG).show();
                     }

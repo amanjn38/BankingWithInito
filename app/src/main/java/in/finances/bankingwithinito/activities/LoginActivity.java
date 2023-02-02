@@ -44,7 +44,7 @@ public class LoginActivity extends AppCompatActivity {
         signup = findViewById(R.id.sign_up);
 
         login_type = getIntent().getStringExtra("login_type");
-
+//        login_type = "customer";
         cUID = findViewById(R.id.email);
         customerUID = cUID.getText().toString();
         fromRegisterActivity = getIntent().getBooleanExtra("fromRegisterActivity", false);
@@ -100,20 +100,23 @@ public class LoginActivity extends AppCompatActivity {
                 finish();
             }
         } else if (login_type.equals("admin")) {
-            if (checkFields()) {
-                progressDialog.setTitle("Authenticating...");
-                progressDialog.setMessage("Please wait.. This may take a moment..");
-                progressDialog.setCancelable(false);
-                progressDialog.show();
+            findViewById(R.id.login).setOnClickListener(view -> {
+                if (checkFields()) {
+                    progressDialog.setTitle("Authenticating...");
+                    progressDialog.setMessage("Please wait.. This may take a moment..");
+                    progressDialog.setCancelable(false);
+                    progressDialog.show();
 
-                customerUID = cUID.getText().toString();
-                if (cUID.equals("admin")) {
-                    admin_login("testing@inito.com");
-                } else {
-                    Toast.makeText(this, "Please enter correct credentials", Toast.LENGTH_LONG).show();
+                    customerUID = cUID.getText().toString();
+                    if (customerUID.equals("admin")) {
+                        admin_login("testing@inito.com");
+                    } else {
+                        Toast.makeText(this, "Please enter correct credentials", Toast.LENGTH_LONG).show();
+                        progressDialog.dismiss();
+                    }
+
                 }
-
-            }
+            });
 
         }
 

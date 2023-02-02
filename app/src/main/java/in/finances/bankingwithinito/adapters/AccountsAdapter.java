@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 import in.finances.bankingwithinito.R;
 import in.finances.bankingwithinito.activities.AccountDetailsActivity;
+import in.finances.bankingwithinito.activities.LoanRepaymentActivity;
 import in.finances.bankingwithinito.models.Individual_Account;
 
 public class AccountsAdapter extends RecyclerView.Adapter<AccountsAdapter.ViewHolder> {
@@ -47,6 +48,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<AccountsAdapter.ViewHo
         }
         holder.balance.setText("Balance : " + individual_account.getBalance());
         holder.account_number.setText("Acc. Num : " + individual_account.getAccount_number());
+
 
         holder.cardView.setOnClickListener(view -> {
             Intent intent = new Intent(context, AccountDetailsActivity.class);
