@@ -1,6 +1,7 @@
 package in.finances.bankingwithinito.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.EditText;
@@ -49,6 +50,7 @@ public class LoanRepaymentActivity extends AppCompatActivity {
                 String amt = amount.getText().toString();
                 Double amtd = Double.parseDouble(amt);
                 if (amtd <= 0.1 * bala) {
+                    System.out.println("testinytt1" );
                     Transaction transaction = new Transaction(System.currentTimeMillis(), "repayment", amtd);
                     FirebaseFirestore db = FirebaseFirestore.getInstance();
                     SharedPreferences sharedPreferences = getSharedPreferences("customerUID", Context.MODE_PRIVATE);
@@ -57,21 +59,20 @@ public class LoanRepaymentActivity extends AppCompatActivity {
                     docRef.get().addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
-                            Map<String, Object> map = document.getData();
-                            ArrayList<Transaction> arrayList = (ArrayList<Transaction>) map.get("transactions");
+                            Map<String, Object> map = new HashMap<>();
+                            ArrayList<Transaction> arrayList = (ArrayList<Transaction>) document.get("transactions");
                             arrayList.add(transaction);
                             map.put("transactions", arrayList);
-                            System.out.println("withdrawal" + map.get("bal").getClass());
-                            Double balance = (Double) map.get("bal");
+                            Double balance = (Double) document.get("bal");
                             balance = balance - amtd;
                             map.put("bal", balance);
 
                             HashMap<String, Object> infor = new HashMap<>();
-                            infor.put("balance", balance);
+                            infor.put("balance", String.valueOf(balance));
 
                             FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
                                 if (task1.isSuccessful()) {
-                                    Toast.makeText(LoanRepaymentActivity.this, "", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(LoanRepaymentActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show();
                                 }
                             });
 
@@ -80,7 +81,10 @@ public class LoanRepaymentActivity extends AppCompatActivity {
                             AdminTransaction adminTransaction = new AdminTransaction(customerUID, "loan", amt, System.currentTimeMillis(), "Loan Repayment");
                             FirebaseFirestore.getInstance().collection("admin_transactions").add(adminTransaction).addOnCompleteListener(task1 -> {
                                 if (task1.isSuccessful()) {
-                                    Toast.makeText(LoanRepaymentActivity.this, "", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(LoanRepaymentActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show();
+                                    Intent intent = new Intent(LoanRepaymentActivity.this, MainActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    startActivity(intent);
                                 }
                             });
 

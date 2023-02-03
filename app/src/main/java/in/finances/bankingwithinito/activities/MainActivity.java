@@ -1,11 +1,13 @@
 package in.finances.bankingwithinito.activities;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements
     private String customerUID;
     private FloatingActionButton addAccount;
     private boolean fromProfileActivity;
+    private ProgressDialog progressDialog;
 
     @SuppressLint("NonConstantResourceId")
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener

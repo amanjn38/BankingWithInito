@@ -139,7 +139,7 @@ public class LoanAccountActivity extends AppCompatActivity {
                                                         infor.put("transactions", transactions);
                                                         String accNum = String.valueOf(generateAccountNumber());
                                                         infor.put("accNum", accNum);
-                                                        infor.put("amount", amount);
+                                                        infor.put("amount", b);
                                                         infor.put("lastInterestCalculationDate", new java.util.Date());
                                                         infor.put("lastTransaction", System.currentTimeMillis());
                                                         Individual_Account individual_account = new Individual_Account(accNum, "loan", balance);
@@ -197,8 +197,9 @@ public class LoanAccountActivity extends AppCompatActivity {
                                                 progressDialog.setCancelable(false);
                                                 progressDialog.show();
 
+                                                double b1 = Double.parseDouble(balance);
                                                 HashMap<String, Object> infor = new HashMap<>();
-                                                double emii = calculateEMI(Double.parseDouble(balance), interest_rate, numMonths);
+                                                double emii = calculateEMI(b1, interest_rate, numMonths);
                                                 infor.put("emi", emii);
                                                 infor.put("time_period", numMonths / 12);
                                                 infor.put("interest_rate", interest_rate);
@@ -206,7 +207,8 @@ public class LoanAccountActivity extends AppCompatActivity {
                                                 infor.put("transactions", transactions);
                                                 String accNum = String.valueOf(generateAccountNumber());
                                                 infor.put("accNum", accNum);
-                                                infor.put("amount", amount);
+                                                infor.put("amount", b1);
+                                                infor.put("bal", b1);
                                                 infor.put("lastInterestCalculationDate", new java.util.Date());
                                                 infor.put("lastTransaction", System.currentTimeMillis());
                                                 Individual_Account individual_account = new Individual_Account(accNum, "loan", balance);

@@ -2,7 +2,7 @@ package in.finances.bankingwithinito.models;
 
 import java.io.Serializable;
 
-public class Individual_Account implements Serializable {
+public class  Individual_Account implements Serializable {
     private String account_number, type;
     private String balance;
 

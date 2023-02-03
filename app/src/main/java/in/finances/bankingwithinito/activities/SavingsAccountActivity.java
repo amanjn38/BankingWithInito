@@ -117,7 +117,8 @@ public class SavingsAccountActivity extends AppCompatActivity {
                                 Long lastOpened = 0L;
                                 ArrayList<Transaction> transactions = new ArrayList<>();
 
-                                infor.put("bal", balance);
+                                double b = Double.parseDouble(balance);
+                                infor.put("bal", b);
                                 infor.put("tt", tt); //total transactions in a month
                                 infor.put("lastopened", lastOpened);
                                 infor.put("transactions", transactions);

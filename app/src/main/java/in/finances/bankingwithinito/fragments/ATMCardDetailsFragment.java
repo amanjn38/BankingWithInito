@@ -1,5 +1,6 @@
 package in.finances.bankingwithinito.fragments;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -46,6 +47,7 @@ public class ATMCardDetailsFragment extends Fragment {
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
     private ArrayList<ATMCardDetails> atmCardDetails;
+    private ProgressDialog progressDialog;
 
     public ATMCardDetailsFragment() {
         // Required empty public constructor
@@ -85,7 +87,10 @@ public class ATMCardDetailsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_a_t_m_card_details_activities, container, false);
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("customerUID", Context.MODE_PRIVATE);
         String customerUID = sharedPreferences.getString("customerUID", "");
-
+        progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setTitle("Please wait");
+        progressDialog.setMessage("While we are loading your details..");
+        progressDialog.show();
         atmCardDetails = new ArrayList<>();
         recyclerView = view.findViewById(R.id.recycler_view);
         layoutManager = new LinearLayoutManager(getContext());
@@ -107,6 +112,7 @@ public class ATMCardDetailsFragment extends Fragment {
                             atmCardDetails.add(atmCardDetail);
                         }
                     }
+                    progressDialog.dismiss();
                     ATMAdapter atmAdapter = new ATMAdapter(atmCardDetails, getContext());
                     recyclerView.setAdapter(atmAdapter);
                     atmAdapter.notifyDataSetChanged();
