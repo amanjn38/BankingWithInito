@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,6 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Objects;
 
 import in.finances.bankingwithinito.R;
 import in.finances.bankingwithinito.models.Individual_Account;
@@ -37,7 +39,8 @@ public class SavingsAccountActivity extends AppCompatActivity {
         createAccount = findViewById(R.id.createAccount);
         accountType = getIntent().getStringExtra("accountType");
 
-
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         createAccount.setOnClickListener(view -> {
             if (accountType.equals("SavingsAccount")) {
                 if (checkFieldsForSavingsAccount()) {
@@ -208,5 +211,20 @@ public class SavingsAccountActivity extends AppCompatActivity {
         return cvv;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(SavingsAccountActivity.this, CreateNewAccountActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
 }

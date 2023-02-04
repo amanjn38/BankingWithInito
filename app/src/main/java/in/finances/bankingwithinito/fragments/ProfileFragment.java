@@ -81,10 +81,8 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
         txtName = view.findViewById(R.id.txtName);
+        txtName.setText(customerUID);
 
-        txtName.setOnClickListener(view1 -> {
-            txtName.setText(customerUID);
-        });
         view.findViewById(R.id.logout).setOnClickListener(e -> {
             auth.signOut();
             SharedPreferences pref = getActivity().getSharedPreferences("customerUID", MODE_PRIVATE);

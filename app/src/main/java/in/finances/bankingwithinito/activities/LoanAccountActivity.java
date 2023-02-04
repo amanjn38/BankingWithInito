@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -28,6 +29,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Objects;
 
 import in.finances.bankingwithinito.R;
 import in.finances.bankingwithinito.models.Individual_Account;
@@ -54,6 +56,8 @@ public class LoanAccountActivity extends AppCompatActivity {
         time = findViewById(R.id.time);
         createNewAccount = findViewById(R.id.createNewAccount);
         emi = findViewById(R.id.emi);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         generate_emi.setOnClickListener(view -> {
             if (checkFieldsForLoanAccount()) {
                 if (spinner.getSelectedItem().toString().equals("Home Loan ( Interest 7% )")) {
@@ -285,11 +289,12 @@ public class LoanAccountActivity extends AppCompatActivity {
         return true;
     }
 
-    private boolean check() {
-        final boolean[] isOldEnough = new boolean[1];
-        System.out.println("testing13" + isOldEnough[0]);
-
-        return isOldEnough[0];
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
-
 }

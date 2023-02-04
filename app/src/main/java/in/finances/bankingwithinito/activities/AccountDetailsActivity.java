@@ -8,29 +8,32 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.Objects;
+
 import in.finances.bankingwithinito.R;
 
 public class AccountDetailsActivity extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_STORAGE = 100;
     public String balance, customerUID, type, accNum;
-    private TextView accountType, withdraw, withdrawWithATM, deposit, downloadStatement;
-    private EditText amount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account_details);
 
-        accountType = findViewById(R.id.account_type);
-        withdraw = findViewById(R.id.withdraw);
-        withdrawWithATM = findViewById(R.id.withdrawWithATM);
-        deposit = findViewById(R.id.deposit);
+        TextView accountType = findViewById(R.id.account_type);
+        TextView withdraw = findViewById(R.id.withdraw);
+        TextView withdrawWithATM = findViewById(R.id.withdrawWithATM);
+        TextView deposit = findViewById(R.id.deposit);
         balance = getIntent().getStringExtra("balance");
         accNum = getIntent().getStringExtra("account_number");
         type = getIntent().getStringExtra("account_type");
-        amount = findViewById(R.id.amount);
-        downloadStatement = findViewById(R.id.downloadStatement);
+        EditText amount = findViewById(R.id.amount);
+        TextView downloadStatement = findViewById(R.id.downloadStatement);
+
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         switch (type) {
             case "savings":
@@ -50,12 +53,22 @@ public class AccountDetailsActivity extends AppCompatActivity {
 
 
         withdraw.setOnClickListener(view -> {
-            Intent intent = new Intent(AccountDetailsActivity.this, IndividualTransactionActivity.class);
-            intent.putExtra("account_number", accNum);
-            intent.putExtra("balance", balance);
-            intent.putExtra("account_type", type);
-            intent.putExtra("type", "normal_withdraw");
-            startActivity(intent);
+            if (type.equalsIgnoreCase("current")) {
+                Intent intent = new Intent(AccountDetailsActivity.this, IndividualTransactionActivity.class);
+                intent.putExtra("account_number", accNum);
+                intent.putExtra("balance", balance);
+                intent.putExtra("account_type", type);
+                intent.putExtra("type", "withdrawal");
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(AccountDetailsActivity.this, IndividualTransactionActivity.class);
+                intent.putExtra("account_number", accNum);
+                intent.putExtra("balance", balance);
+                intent.putExtra("account_type", type);
+                intent.putExtra("type", "normal_withdraw");
+                startActivity(intent);
+            }
+
         });
 
         withdrawWithATM.setOnClickListener(view -> {
@@ -87,6 +100,12 @@ public class AccountDetailsActivity extends AppCompatActivity {
         });
 
         downloadStatement.setOnClickListener(view -> {
+            Intent intent = new Intent(AccountDetailsActivity.this, TransactionsActivity.class);
+            intent.putExtra("account_number", accNum);
+            intent.putExtra("balance", balance);
+            intent.putExtra("account_type", type);
+            intent.putExtra("type", "deposit");
+            startActivity(intent);
         });
     }
 

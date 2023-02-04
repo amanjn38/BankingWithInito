@@ -3,6 +3,7 @@ package in.finances.bankingwithinito.activities;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -13,6 +14,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 import in.finances.bankingwithinito.R;
 
@@ -55,7 +57,8 @@ public class ReferralActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_referral);
-
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         generateReferralCode = findViewById(R.id.generateReferralCode);
         accNum = findViewById(R.id.accNum);
         referralCodetxt = findViewById(R.id.referralCodetxt);
@@ -87,5 +90,14 @@ public class ReferralActivity extends AppCompatActivity {
             referralCode += letterValues.get(name.charAt(i));
         }
         referralCodetxt.setText(String.valueOf(referralCode));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

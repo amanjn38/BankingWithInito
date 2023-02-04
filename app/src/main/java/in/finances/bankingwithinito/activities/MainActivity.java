@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.widget.ProgressBar;
+import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,6 +24,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Objects;
 
 import in.finances.bankingwithinito.R;
 import in.finances.bankingwithinito.fragments.ATMCardDetailsFragment;
@@ -38,7 +39,6 @@ public class MainActivity extends AppCompatActivity implements
     private String customerUID;
     private FloatingActionButton addAccount;
     private boolean fromProfileActivity;
-    private ProgressDialog progressDialog;
 
     @SuppressLint("NonConstantResourceId")
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -76,7 +76,8 @@ public class MainActivity extends AppCompatActivity implements
         addAccount = findViewById(R.id.addAccount);
         customerUID = getIntent().getStringExtra("customerUID");
         fromProfileActivity = getIntent().getBooleanExtra("fromProfileActivity", false);
-
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if (fromProfileActivity) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                     new ProfileFragment()).commit();
@@ -254,4 +255,14 @@ public class MainActivity extends AppCompatActivity implements
     public void onFragmentInteraction(Uri uri) {
 
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 }

@@ -41,7 +41,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         holder.transaction_type.setText(adminTransaction.getTransaction_type());
         holder.amount.setText("Amount : " + adminTransaction.getAmount());
         holder.account_type.setText("Account type : " + adminTransaction.getAccount_type());
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss a");
         Date resultdate = new Date(adminTransaction.getTime());
         String date = sdf.format(resultdate);
         holder.date.setText("Date : " + date);

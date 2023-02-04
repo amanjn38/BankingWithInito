@@ -15,7 +15,7 @@
         android:padding="16dp">
 
         <TextView
-            android:id="@+id/customerUID"
+            android:id="@+id/amount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/qwerty"
@@ -24,31 +24,18 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/detailName"
+            android:id="@+id/transaction_type"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:text="@string/name" />
 
         <TextView
-            android:id="@+id/detailPhone"
+            android:id="@+id/transaction_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="@string/phone" />
+            android:text="@string/date" />
 
-        <TextView
-            android:id="@+id/detailEmail"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/email" />
-
-        <TextView
-            android:id="@+id/detailAddress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/address" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -34,7 +35,8 @@ public class ProfileActivity extends AppCompatActivity {
         mailEdit = findViewById(R.id.mail);
         addressButton = findViewById(R.id.address_modify);
         getData();
-
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         TextView confirm_reg = findViewById(R.id.back_order_button);
         confirm_reg.setOnClickListener(e -> {
             Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
@@ -58,5 +60,13 @@ public class ProfileActivity extends AppCompatActivity {
                 phoneEdit.setText(d.get("ph").toString());
             }
         });
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

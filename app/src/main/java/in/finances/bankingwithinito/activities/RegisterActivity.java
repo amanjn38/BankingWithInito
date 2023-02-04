@@ -1,5 +1,7 @@
 package in.finances.bankingwithinito.activities;
 
+import static in.finances.bankingwithinito.Utils.generateDate;
+import static in.finances.bankingwithinito.Utils.getDate;
 import static in.finances.bankingwithinito.models.SharedClass.CUSTOMER_PATH;
 import static in.finances.bankingwithinito.models.SharedClass.Mail;
 import static in.finances.bankingwithinito.models.SharedClass.Name;
@@ -41,6 +43,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import in.finances.bankingwithinito.R;
@@ -80,7 +83,8 @@ public class RegisterActivity extends AppCompatActivity {
         });
         database = FirebaseDatabase.getInstance();
         FirebaseAuth auth = FirebaseAuth.getInstance();
-
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         update = getIntent().getBooleanExtra("update", false);
         Places.initialize(RegisterActivity.this, "AIzaSyAzScFoOmgLSQsVPK7QT4btN9wIhjoP4qM");
         List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG);
@@ -289,69 +293,4 @@ public class RegisterActivity extends AppCompatActivity {
         }
         return id.toString();
     }
-
-    public static Date getDate(int year, int month, int day) {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.YEAR, year);
-        cal.set(Calendar.MONTH, month);
-        cal.set(Calendar.DAY_OF_MONTH, day);
-        return cal.getTime();
-    }
-
-    public static String generateDate(int year, int month, int day) {
-        String date = day + "";
-        switch (day % 10) {
-            case 1:
-                date += "st";
-                break;
-            case 2:
-                date += "nd";
-                break;
-            case 3:
-                date += "rd";
-                break;
-            default:
-                date += "th";
-        }
-        switch (month) {
-            case 0:
-                date += " Jan";
-                break;
-            case 1:
-                date += " Feb";
-                break;
-            case 2:
-                date += " Mar";
-                break;
-            case 3:
-                date += " Apr";
-                break;
-            case 4:
-                date += " May";
-                break;
-            case 5:
-                date += " June";
-                break;
-            case 6:
-                date += " July";
-                break;
-            case 7:
-                date += " Aug";
-                break;
-            case 8:
-                date += " Sept";
-                break;
-            case 9:
-                date += " Oct";
-                break;
-            case 10:
-                date += " Nov";
-                break;
-            case 11:
-                date += " Dec";
-                break;
-        }
-        return date;
-    }
-
 }

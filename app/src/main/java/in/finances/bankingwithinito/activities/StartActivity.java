@@ -10,15 +10,13 @@ import in.finances.bankingwithinito.R;
 
 public class StartActivity extends AppCompatActivity {
 
-    private TextView admin_login, customer_login;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
-        admin_login = findViewById(R.id.admin_login);
-        customer_login = findViewById(R.id.customer_login);
+        TextView admin_login = findViewById(R.id.admin_login);
+        TextView customer_login = findViewById(R.id.customer_login);
 
         admin_login.setOnClickListener(view -> {
             Intent intent = new Intent(StartActivity.this, LoginActivity.class);
@@ -34,4 +32,6 @@ public class StartActivity extends AppCompatActivity {
             startActivity(intent);
         });
     }
+
+
 }

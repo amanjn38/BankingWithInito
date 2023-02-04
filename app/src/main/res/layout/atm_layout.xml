@@ -13,7 +13,7 @@
             android:id="@+id/account_number_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Account Number: 123456"
+            android:text="@string/account_number_123456"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -38,19 +38,19 @@
                     android:id="@+id/atmCardNumber"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ATM Card Number: **** **** **** 1234" />
+                    android:text="@string/atm_card_number_1234" />
 
                 <TextView
                     android:id="@+id/cvvNumber"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="CVV: 123" />
+                    android:text="@string/cvv_123" />
 
                 <TextView
                     android:id="@+id/expiryDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Expiry Date: 12/24" />
+                    android:text="@string/expiry_date_12_24" />
 
             </LinearLayout>
 

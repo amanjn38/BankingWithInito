@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:gravity="center"
-        android:text="Create a new Loan Account"
+        android:text="@string/create_a_new_loan_account"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -36,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
-        android:hint="Amount :"
+        android:hint="@string/amount"
         android:textColorHint="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -69,21 +69,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
-        android:editable="false"
-        android:hint="EMI :"
+        android:hint="@string/emi"
         android:textColorHint="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/time">
 
         <EditText
-            android:visibility="gone"
             android:id="@+id/emi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="#ffffff"
             android:ems="10"
-            android:enabled="false" />
+            android:enabled="false"
+            android:visibility="gone" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
@@ -96,7 +95,7 @@
         android:layout_marginBottom="24dp"
         android:background="@drawable/ic_button"
         android:gravity="center"
-        android:text="Generate EMI"
+        android:text="@string/generate_emi"
         android:textColor="#ffffff"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -113,7 +112,7 @@
         android:layout_marginBottom="24dp"
         android:background="@drawable/ic_button"
         android:gravity="center"
-        android:text="Create New Account"
+        android:text="@string/create_new_account"
         android:textColor="#ffffff"
         android:textSize="20sp"
         android:visibility="gone"

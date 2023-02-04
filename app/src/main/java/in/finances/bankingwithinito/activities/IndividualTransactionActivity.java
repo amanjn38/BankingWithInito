@@ -1,5 +1,6 @@
 package in.finances.bankingwithinito.activities;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -7,6 +8,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -18,17 +20,21 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import in.finances.bankingwithinito.R;
 import in.finances.bankingwithinito.models.AdminTransaction;
@@ -40,13 +46,15 @@ public class IndividualTransactionActivity extends AppCompatActivity {
     public String balance, error_msg, customerUID, type, accNum, t_type, daily_limit, cardNumberS, cvvS, expiryS;
     private LinearLayout ll;
     private EditText amount, cardNumber, cvv, expiryDate;
-    private final double NRV = 100000;
-    private final double fee = 1000;
+    private ProgressDialog progressDialog;
+    private TextInputLayout textInputLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_individual_transaction);
+
+        textInputLayout = findViewById(R.id.holderCardNumber);
 
         transaction_type = findViewById(R.id.transaction_type);
         amount = findViewById(R.id.amount);
@@ -63,11 +71,18 @@ public class IndividualTransactionActivity extends AppCompatActivity {
         if (t_type.equalsIgnoreCase("atm_withdraw")) {
             ll.setVisibility(View.VISIBLE);
             cardNumber.setVisibility(View.VISIBLE);
+            textInputLayout.setVisibility(View.VISIBLE);
         }
-
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("Please wait");
+        progressDialog.setMessage("While we are completing the transaction..");
+        progressDialog.show();
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         completeTransaction = findViewById(R.id.completeTransaction);
         completeTransaction.setOnClickListener(view -> {
             if (t_type.equalsIgnoreCase("normal_withdraw") && type.equalsIgnoreCase("savings")) {
+                transaction_type.setText("Withdraw");
                 String amt = amount.getText().toString();
 
                 SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0);
@@ -99,6 +114,8 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                     }
                 }
             } else if (t_type.equalsIgnoreCase("atm_withdraw") && type.equalsIgnoreCase("savings")) {
+                transaction_type.setText("Withdraw");
+
                 String amt = amount.getText().toString();
                 SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0);
                 SharedPreferences.Editor editor = pref.edit();
@@ -123,6 +140,8 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                 }
 
             } else if (t_type.equalsIgnoreCase("deposit") && type.equalsIgnoreCase("savings")) {
+                transaction_type.setText("Deposit");
+
                 String amt = amount.getText().toString();
                 Double a = Double.parseDouble(amt);
                 Transaction transaction = new Transaction(System.currentTimeMillis(), "deposit", a);
@@ -147,21 +166,25 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                                 Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show();
                             }
                         });
-                        FirebaseFirestore.getInstance().collection("customers_accounts").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
+                        docRef.update(map).addOnSuccessListener(aVoid -> Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show());
+
+                        FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
                             if (task1.isSuccessful()) {
+                                progressDialog.dismiss();
                                 Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show();
                                 Intent intent = new Intent(IndividualTransactionActivity.this, MainActivity.class);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 startActivity(intent);
                             }
                         });
-                        docRef.update(map).addOnSuccessListener(aVoid -> Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show());
                     } else {
                         Toast.makeText(this, "Error getting details", Toast.LENGTH_LONG).show();
                     }
                 });
 
             } else if (t_type.equalsIgnoreCase("deposit") && type.equalsIgnoreCase("current")) {
+                transaction_type.setText("Deposit");
+
                 String amt = amount.getText().toString();
                 Double a = Double.parseDouble(amt);
                 Transaction transaction = new Transaction(System.currentTimeMillis(), "deposit", a);
@@ -184,8 +207,7 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                                 arrayList.add(transaction);
                                 map.put("transactions", arrayList);
                             }
-                            String balance = document.getString("bal");
-                            double d = Double.parseDouble(balance);
+                            double d = document.getDouble("bal");
                             d = d + Double.parseDouble(amt);
                             map.put("bal", d);
                             HashMap<String, Object> infor = new HashMap<>();
@@ -194,18 +216,20 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                             AdminTransaction adminTransaction = new AdminTransaction(customerUID, "current", amt, System.currentTimeMillis(), "Deposit");
                             FirebaseFirestore.getInstance().collection("admin_transactions").add(adminTransaction).addOnCompleteListener(task1 -> {
                                 if (task1.isSuccessful()) {
-                                    Toast.makeText(IndividualTransactionActivity.this, "", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show();
                                 }
                             });
-                            FirebaseFirestore.getInstance().collection("customers_accounts").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
+                            docRef.update(map).addOnSuccessListener(aVoid -> Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show());
+
+                            FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
                                 if (task1.isSuccessful()) {
-                                    Toast.makeText(IndividualTransactionActivity.this, "", Toast.LENGTH_LONG).show();
+                                    progressDialog.dismiss();
+                                    Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show();
                                     Intent intent = new Intent(IndividualTransactionActivity.this, MainActivity.class);
                                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                     startActivity(intent);
                                 }
                             });
-                            docRef.update(map).addOnSuccessListener(aVoid -> Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show());
                         } else {
                             Toast.makeText(this, "Document does not exist", Toast.LENGTH_LONG).show();
 
@@ -215,118 +239,46 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                     }
                 });
             } else if (t_type.equalsIgnoreCase("withdrawal") && type.equalsIgnoreCase("current")) {
-//            FirebaseFirestore db = FirebaseFirestore.getInstance();
-//
-//            // Get the current account document
-//            DocumentReference currentAcc = db.collection("customers_accounts_spec").document(customerUID)
-//                    .collection("current").document(accNum);
-//
-//            // Get the current time
-//            Calendar calendar = Calendar.getInstance();
-//            int currentMonth = calendar.get(Calendar.MONTH);
-//            int currentYear = calendar.get(Calendar.YEAR);
-//            int currentDay = calendar.get(Calendar.DAY_OF_MONTH);
-//            String monthlyKey = currentMonth + "/" + currentYear;
-//            currentAcc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//                @Override
-//                public void onSuccess(DocumentSnapshot documentSnapshot) {
-//                    // Check if the monthly transaction count field exists
-//                    if (documentSnapshot.contains(monthlyKey)) {
-//                        // If it exists, increment the count
-//                        currentAcc.update(monthlyKey, FieldValue.increment(1));
-//                        currentAcc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//                            @Override
-//                            public void onSuccess(DocumentSnapshot documentSnapshot) {
-//                                int transactionCount = documentSnapshot.getLong(monthlyKey).intValue();
-//                                if (transactionCount < 3) {
-//                                    // Deduct Rs. 500 from the balance as a penalty
-//                                    currentAcc.update("balance", FieldValue.increment(-500))
-//                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                                                @Override
-//                                                public void onSuccess(Void aVoid) {
-//                                                    Log.d("PENALTY", "A penalty of Rs. 500 has been charged for not making at least 3 transactions this month");
-//                                                }
-//                                            });
-//                                }
-//
-//                                // Deduct the amount from the balance
-//                                currentAcc.update("balance", FieldValue.increment(-amount))
-//                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                                            @Override
-//                                            public void onSuccess(Void aVoid) {
-//                                                // Calculate the transaction charge
-//                                                double transactionCharge = amount * 0.005;
-//                                                transactionCharge = Math.min(transactionCharge, 500);
-//
-//                                                // Deduct the transaction charge from the balance
-//                                                currentAcc.update("balance", FieldValue.increment(-transactionCharge))
-//                                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                                                            @Override
-//                                                            public void onSuccess(Void aVoid) {
-//                                                                // Log the transaction
-//                                                                Log.d("WITHDRAW", "Withdrawal of Rs." + amount + " with a charge of Rs." + transactionCharge + " is successful");
-//                                                            }
-//                                                        });
-//                                            }
-//                                        });
-//                            }
-//                        });
-//
-//                    } else {
-//                        // If it doesn't exist, create it with a value of 1
-//                        currentAcc.update(monthlyKey, 1);
-//                    }
-//                }
-//            });
-//
-//            // Update the transaction count for the current month
-//            currentAcc.update("transactions_" + currentMonth + "_" + currentYear, FieldValue.increment(1))
-//                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                        @Override
-//                        public void onSuccess(Void aVoid) {
-//                            // Check if the transaction count is less than 3
-//                            currentAcc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//                                @Override
-//                                public void onSuccess(DocumentSnapshot documentSnapshot) {
-//                                    int transactionCount = documentSnapshot.getLong("transactions_" + currentMonth + "_" + currentYear).intValue();
-//                                    if (transactionCount < 3) {
-//                                        // Deduct Rs. 500 from the balance as a penalty
-//                                        currentAcc.update("balance", FieldValue.increment(-500))
-//                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                                                    @Override
-//                                                    public void onSuccess(Void aVoid) {
-//                                                        Log.d("PENALTY", "A penalty of Rs. 500 has been charged for not making at least 3 transactions this month");
-//                                                    }
-//                                                });
-//                                    }
-//
-//                                    // Deduct the amount from the balance
-//                                    currentAcc.update("balance", FieldValue.increment(-amount))
-//                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                                                @Override
-//                                                public void onSuccess(Void aVoid) {
-//                                                    // Calculate the transaction charge
-//                                                    double transactionCharge = amount * 0.005;
-//                                                    transactionCharge = Math.min(transactionCharge, 500);
-//
-//                                                    // Deduct the transaction charge from the balance
-//                                                    currentAcc.update("balance", FieldValue.increment(-transactionCharge))
-//                                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                                                                @Override
-//                                                                public void onSuccess(Void aVoid) {
-//                                                                    // Log the transaction
-//                                                                    Log.d("WITHDRAW", "Withdrawal of Rs." + amount + " with a charge of Rs." + transactionCharge + " is successful");
-//                                                                }
-//                                                            });
-//                                                }
-//                                            });
-//                                }
-//                            });
-//                        }
-//                    });
+                transaction_type.setText("Withdraw");
+
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                String amt = amount.getText().toString();
+                Double a = Double.parseDouble(amt);
+                // Get the current account document
+                DocumentReference currentAcc = db.collection("customers_account_spec").document(customerUID)
+                        .collection("current").document(accNum);
+
+                // Get the current time
+                Calendar calendar = Calendar.getInstance();
+                int currentMonth = calendar.get(Calendar.MONTH);
+                int currentYear = calendar.get(Calendar.YEAR);
+                int currentDay = calendar.get(Calendar.DAY_OF_MONTH);
+                String monthlyKey = currentMonth + currentYear + "";
+                currentAcc.get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot documentSnapshot = task.getResult();
+                        if (documentSnapshot.contains(monthlyKey)) {
+                            currentAcc.update(monthlyKey, FieldValue.increment(1));
+                            currentAcc.get().addOnCompleteListener(task12 -> {
+                                if (task12.isSuccessful()) {
+                                    DocumentSnapshot documentSnapshot1 = task12.getResult();
+                                    int transactionCount = documentSnapshot1.getLong(monthlyKey).intValue();
+                                    current_account_withdrawal(a, transactionCount);
+
+                                } else {
+                                    System.out.println("working1111" + "error2311");
+
+                                }
+                            });
+                        } else {
+                            current_account_withdrawal(a, 1);
+                        }
+                    } else {
+                        System.out.println("working1111" + "error");
+                    }
+                });
             }
         });
-
         cardNumber.addTextChangedListener(new TextWatcher() {
             private static final char space = ' ';
 
@@ -387,7 +339,9 @@ public class IndividualTransactionActivity extends AppCompatActivity {
         } catch (ParseException e) {
             //expiry date is invalid
         }
+
     }
+
 
     private void normal_withdraw(String amt) {
         Double a = Double.parseDouble(amt);
@@ -412,7 +366,7 @@ public class IndividualTransactionActivity extends AppCompatActivity {
 
                     FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
-                            Toast.makeText(IndividualTransactionActivity.this, "", Toast.LENGTH_LONG).show();
+                            Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_SHORT).show();
                         }
                     });
                     long dt = (long) map.get("dt");
@@ -420,15 +374,19 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                     map.put("dt", dt);
                     map.put("lastTransaction", System.currentTimeMillis());
 
+                    docRef.update(map).addOnSuccessListener(aVoid -> Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_SHORT).show());
+
                     AdminTransaction adminTransaction = new AdminTransaction(customerUID, "savings", amt, System.currentTimeMillis(), "Direct Withdrawal");
                     FirebaseFirestore.getInstance().collection("admin_transactions").add(adminTransaction).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
-                            Toast.makeText(IndividualTransactionActivity.this, "", Toast.LENGTH_LONG).show();
+                            progressDialog.dismiss();
+                            Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show();
+                            Intent intent = new Intent(IndividualTransactionActivity.this, MainActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
+
                         }
                     });
-
-                    docRef.update(map).addOnSuccessListener(aVoid -> Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show());
-
                 } else {
                     Toast.makeText(this, "You don't have enough balance in your account", Toast.LENGTH_LONG).show();
                 }
@@ -444,51 +402,44 @@ public class IndividualTransactionActivity extends AppCompatActivity {
         cvvS = cvv.getText().toString();
         System.out.println("testinacc" + customerUID + "  " + accNum);
         DocumentReference customerAccountRef = db.collection("customers_account_spec").document(customerUID).collection("savings").document(accNum);
-        customerAccountRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot documentSnapshot = task.getResult();
-                    expiryS = expiryDate.getText().toString();
+        customerAccountRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot documentSnapshot = task.getResult();
+                expiryS = expiryDate.getText().toString();
 
-                    HashMap<String, Object> map = new HashMap<>();
+                HashMap<String, Object> map = new HashMap<>();
 
-                    boolean dateEqual = false;
-                    SimpleDateFormat dateFormat1 = new SimpleDateFormat("MM/yyyy");
-                    SimpleDateFormat dateFormat2 = new SimpleDateFormat("MM/yy");
-                    try {
-                        Date date1 = dateFormat1.parse(documentSnapshot.getString("expiry"));
-                        Date date2 = dateFormat2.parse(expiryS);
-                        if (date1.compareTo(date2) == 0) {
-                            dateEqual = true;
-                        }
-                    } catch (ParseException e) {
-                        e.printStackTrace();
+                boolean dateEqual = false;
+                SimpleDateFormat dateFormat1 = new SimpleDateFormat("MM/yyyy");
+                SimpleDateFormat dateFormat2 = new SimpleDateFormat("MM/yy");
+                try {
+                    Date date1 = dateFormat1.parse(documentSnapshot.getString("expiry"));
+                    Date date2 = dateFormat2.parse(expiryS);
+                    if (date1.compareTo(date2) == 0) {
+                        dateEqual = true;
                     }
-                    System.out.println("printing" + documentSnapshot.getString("cardNumber") + "   " + cardNumberS);
-
-                    System.out.println("printing1" + documentSnapshot.getString("cvv") + "   " + cvvS);
-                    System.out.println("printing2" + dateEqual);
-
-                    if (documentSnapshot.getString("cardNumber").equalsIgnoreCase(cardNumberS) && documentSnapshot.getString("cvv").equalsIgnoreCase(cvvS) && dateEqual) {
-                        int awiad = documentSnapshot.getLong("awiad").intValue();
-                        if (awiad < 5) {
-                            map.put("awiad", awiad + 1);
-                            customerAccountRef.update(map).addOnCompleteListener(task12 -> atm_withdraw_helper(amt, "normal"));
-
-                        } else {
-                            if (Double.parseDouble(amt) <= 20000) {
-                                map.put("awiad", awiad + 1);
-                                customerAccountRef.update(map).addOnCompleteListener(task1 -> atm_withdraw_helper(amt, "add_fees"));
-                            } else {
-                                Toast.makeText(IndividualTransactionActivity.this, "The maximum withdrawal limit is Rs. 20000", Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    } else {
-                        Toast.makeText(IndividualTransactionActivity.this, "Please enter correct card details", Toast.LENGTH_LONG).show();
-                    }
-
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
+
+                if (documentSnapshot.getString("cardNumber").equalsIgnoreCase(cardNumberS) && documentSnapshot.getString("cvv").equalsIgnoreCase(cvvS) && dateEqual) {
+                    int awiad = documentSnapshot.getLong("awiad").intValue();
+                    if (awiad < 5) {
+                        map.put("awiad", awiad + 1);
+                        customerAccountRef.update(map).addOnCompleteListener(task12 -> atm_withdraw_helper(amt, "normal"));
+
+                    } else {
+                        if (Double.parseDouble(amt) <= 20000) {
+                            map.put("awiad", awiad + 1);
+                            customerAccountRef.update(map).addOnCompleteListener(task1 -> atm_withdraw_helper(amt, "add_fees"));
+                        } else {
+                            Toast.makeText(IndividualTransactionActivity.this, "The maximum withdrawal limit is Rs. 20000", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                } else {
+                    Toast.makeText(IndividualTransactionActivity.this, "Please enter correct card details", Toast.LENGTH_LONG).show();
+                }
+
             }
         });
     }
@@ -525,22 +476,24 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                     HashMap<String, Object> infor = new HashMap<>();
                     infor.put("balance", balance);
 
-                    FirebaseFirestore.getInstance().collection("customers_accounts").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
+                    FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
                             Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show();
                         }
                     });
                     map.put("lastTransaction", System.currentTimeMillis());
+                    docRef.update(map).addOnSuccessListener(aVoid -> Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show());
+
                     AdminTransaction adminTransaction = new AdminTransaction(customerUID, "current", amt, System.currentTimeMillis(), "ATM Withdrawal");
                     FirebaseFirestore.getInstance().collection("admin_transactions").add(adminTransaction).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
+                            progressDialog.dismiss();
                             Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show();
                             Intent intent = new Intent(IndividualTransactionActivity.this, MainActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(intent);
                         }
                     });
-                    docRef.update(map).addOnSuccessListener(aVoid -> Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_LONG).show());
                 } else {
                     Toast.makeText(this, "You don't have enough balance in your account", Toast.LENGTH_LONG).show();
                 }
@@ -549,6 +502,80 @@ public class IndividualTransactionActivity extends AppCompatActivity {
                 Toast.makeText(this, "Error getting details", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void current_account_withdrawal(double a, int transactions) {
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference currentAcc = db.collection("customers_account_spec").document(customerUID)
+                .collection("current").document(accNum);
+
+        // Get the current time
+        Calendar calendar = Calendar.getInstance();
+        int currentMonth = calendar.get(Calendar.MONTH);
+        int currentYear = calendar.get(Calendar.YEAR);
+        int currentDay = calendar.get(Calendar.DAY_OF_MONTH);
+        String monthlyKey = currentMonth + currentYear + "";
+        Transaction transaction = new Transaction(System.currentTimeMillis(), "Withdrawal", a);
+        currentAcc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot documentSnapshot = task.getResult();
+                    Map<String, Object> map = new HashMap<>();
+                    map.put(monthlyKey, 1);
+                    ArrayList<Transaction> arrayList = (ArrayList<Transaction>) documentSnapshot.get("transactions");
+                    arrayList.add(transaction);
+                    map.put("transactions", arrayList);
+                    double balance = documentSnapshot.getDouble("bal");
+                    if (transactions < 3) {
+                        balance = balance - 500;
+                    }
+                    balance = balance - a;
+
+                    double transactionCharge = a * 0.005;
+                    transactionCharge = Math.min(transactionCharge, 500);
+                    balance = balance - transactionCharge;
+                    map.put("bal", balance);
+
+                    currentAcc.update(map).addOnCompleteListener(task14 -> {
+                        if (task14.isSuccessful()) {
+
+                        }
+                    });
+
+                    HashMap<String, Object> infor = new HashMap<>();
+                    infor.put("bal", String.valueOf(balance));
+                    FirebaseFirestore.getInstance().collection("customers_account").document(customerUID).collection("accounts").document(accNum).update(infor).addOnCompleteListener(task1 -> {
+                        if (task1.isSuccessful()) {
+                            Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        });
+
+
+        AdminTransaction adminTransaction = new AdminTransaction(customerUID, "current", String.valueOf(a), System.currentTimeMillis(), "Withdrawal");
+        FirebaseFirestore.getInstance().collection("admin_transactions").add(adminTransaction).addOnCompleteListener(task1 -> {
+            if (task1.isSuccessful()) {
+                progressDialog.dismiss();
+                Toast.makeText(IndividualTransactionActivity.this, "Transaction Successful", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(IndividualTransactionActivity.this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        });
+
 
     }
 }

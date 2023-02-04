@@ -1,6 +1,7 @@
 package in.finances.bankingwithinito.activities;
 
 import android.os.Bundle;
+import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -10,6 +11,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import in.finances.bankingwithinito.R;
 import in.finances.bankingwithinito.adapters.CustomerDetailsAdapter;
@@ -31,7 +33,8 @@ public class CustomerDetailsActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.details_recyclerView);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         FirebaseFirestore.getInstance().collection("customers").get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -56,7 +59,14 @@ public class CustomerDetailsActivity extends AppCompatActivity {
                     recyclerView.setAdapter(customerDetailsAdapter);
                     customerDetailsAdapter.notifyDataSetChanged();
                 });
+    }
 
-
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

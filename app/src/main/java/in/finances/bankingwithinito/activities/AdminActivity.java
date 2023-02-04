@@ -2,6 +2,7 @@ package in.finances.bankingwithinito.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,6 +14,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import in.finances.bankingwithinito.R;
 import in.finances.bankingwithinito.adapters.TransactionAdapter;
@@ -36,7 +38,8 @@ public class AdminActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         customerDetails = findViewById(R.id.customerDetails);
         logout = findViewById(R.id.logout);
-
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseFirestore.getInstance().collection("admin_transactions").get()
                 .addOnCompleteListener(task -> {
@@ -62,5 +65,14 @@ public class AdminActivity extends AppCompatActivity {
             mainActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(mainActivity);
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

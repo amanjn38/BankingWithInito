@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
-        android:text="Select Account Type"
+        android:text="@string/select_account_type"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -24,7 +24,7 @@
         android:layout_margin="24dp"
         android:background="@drawable/address"
         android:gravity="center"
-        android:text="Savings Account"
+        android:text="@string/savings_account"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/type" />
@@ -36,7 +36,7 @@
         android:layout_margin="24dp"
         android:background="@drawable/address"
         android:gravity="center"
-        android:text="Current Account"
+        android:text="@string/current_account"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/savings" />
@@ -48,7 +48,7 @@
         android:layout_margin="24dp"
         android:background="@drawable/address"
         android:gravity="center"
-        android:text="Loan Account"
+        android:text="@string/loan_account"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/current" />

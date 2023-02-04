@@ -11,7 +11,7 @@
         android:id="@+id/text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Welcome !!"
+        android:text="@string/welcome"
         android:textColor="#ffffff"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -19,7 +19,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.35" />
+        app:layout_constraintVertical_bias="0.30" />
 
     <TextView
         android:id="@+id/customer_login"
@@ -31,13 +31,13 @@
         android:layout_marginBottom="24dp"
         android:background="@drawable/address"
         android:gravity="center"
-        android:text="Customer Login"
+        android:text="@string/customer_login"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.5" />
+        app:layout_constraintVertical_bias="0.45" />
 
     <TextView
         android:id="@+id/admin_login"
@@ -49,12 +49,12 @@
         android:layout_marginBottom="24dp"
         android:background="@drawable/address"
         android:gravity="center"
-        android:text="Admin Login"
+        android:text="@string/admin_login"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.65" />
+        app:layout_constraintVertical_bias="0.60" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

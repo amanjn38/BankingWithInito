@@ -1,5 +1,6 @@
 package in.finances.bankingwithinito.fragments;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -7,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -18,8 +20,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +49,8 @@ public class AccountsListFragment extends Fragment {
     private String customerUID;
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
+    private ProgressDialog progressDialog;
+    private TextView no_accounts;
 
     public AccountsListFragment() {
         // Required empty public constructor
@@ -88,11 +90,15 @@ public class AccountsListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_accounts_list_activity, container, false);
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("customerUID", Context.MODE_PRIVATE);
         String customerUID = sharedPreferences.getString("customerUID", "");
-
+        progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setTitle("Please wait");
+        progressDialog.setMessage("While we are loading your accounts..");
+        progressDialog.show();
         individual_accounts = new ArrayList<>();
         recyclerView = view.findViewById(R.id.recycler_view);
         layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
+        no_accounts = view.findViewById(R.id.no_accounts);
 
         System.out.println("testing accounts");
         FirebaseFirestore.getInstance().collection("customers_usernames").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -117,17 +123,14 @@ public class AccountsListFragment extends Fragment {
                                     recyclerView.setAdapter(accountsAdapter);
                                     accountsAdapter.notifyDataSetChanged();
                                 });
-
+                        progressDialog.dismiss();
                     }
+                } else {
+                    no_accounts.setVisibility(View.VISIBLE);
+                    progressDialog.dismiss();
                 }
             }
         });
-
-        System.out.println("CustomerUID Fragment" + customerUID);
-        if (customerUID != null) {
-
-        }
-
         return view;
     }
 

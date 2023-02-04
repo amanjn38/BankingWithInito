@@ -46,7 +46,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<AccountsAdapter.ViewHo
         } else if (individual_account.getType().equals("current")) {
             holder.account_type.setText("Current Acccount");
         }
-        holder.balance.setText("Balance : " + individual_account.getBalance());
+        holder.balance.setText("Balance : Rs." + individual_account.getBalance());
         holder.account_number.setText("Acc. Num : " + individual_account.getAccount_number());
 
 
