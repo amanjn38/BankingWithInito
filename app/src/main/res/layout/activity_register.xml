@@ -63,8 +63,7 @@
                         android:layout_height="wrap_content"
                         android:backgroundTint="#ffffff"
                         android:ems="10"
-                        android:enabled="false"
-                        android:visibility="gone" />
+                        android:enabled="false"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout

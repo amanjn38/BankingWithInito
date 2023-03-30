@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements
 
                             int currentMonth = calendar.get(Calendar.MONTH);
                             if (lastInt == 0) {
-                                double interest = bal * 0.06 / 12 * (currentMonth - month);
+                                double interest = bal * 0.06 / 12 * (currentMonth - lastInt);
                                 bal += interest;
                             } else {
                                 double interest = bal * 0.06 / 12 * (currentMonth - lastInt);
